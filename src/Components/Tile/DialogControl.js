@@ -28,6 +28,8 @@ import NotificationTimer from '../Additional/NotificationTimer';
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
 import './DialogControl.css';
+import { withSnackbar } from 'notistack';
+import { compose } from 'recompose';
 
 import LeaveChatDialog from '../Dialog/LeaveChatDialog';
 import ClearHistoryDialog from '../Dialog/ClearHistoryDialog';
@@ -259,6 +261,32 @@ class DialogControl extends Component {
         }
     };
 
+    getLeaveChatNotification = chatId => {
+        const chat = ChatStore.get(chatId);
+        if (!chat) return 'Chat deleted';
+        if (!chat.type) return 'Chat deleted';
+
+        switch (chat.type['@type']) {
+            case 'chatTypeBasicGroup': {
+                return 'Chat deleted';
+            }
+            case 'chatTypeSupergroup': {
+                const supergroup = SupergroupStore.get(chat.type.supergroup_id);
+                if (supergroup) {
+                    return supergroup.is_channel ? 'Left channel' : 'Left group';
+                }
+
+                return 'Chat deleted';
+            }
+            case 'chatTypePrivate':
+            case 'chatTypeSecret': {
+                return 'Chat deleted';
+            }
+        }
+
+        return 'Chat deleted';
+    };
+
     render() {
         const { classes, chatId, showSavedMessages, hidden } = this.props;
         const { left, top, contextMenu, openDelete, openClearHistory } = this.state;
@@ -334,4 +362,9 @@ DialogControl.defaultProps = {
     showSavedMessages: true
 };
 
-export default withStyles(styles, { withTheme: true })(DialogControl);
+const enhance = compose(
+    withStyles(styles, { withTheme: true }),
+    withSnackbar
+);
+
+export default enhance(DialogControl);
