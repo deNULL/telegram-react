@@ -165,7 +165,7 @@ class SignInControl extends React.Component {
         let { phoneCode, phoneNumber, onPhoneEnter } = this.props;
 
         phoneCode = this.state.phoneCode || phoneCode || '';
-        phoneNumber = this.state.phoneNumber || phoneNumber || '';
+        phoneNumber = this.phoneNumber || phoneNumber || '';
 
         if (!isValidPhoneNumber(phoneCode + phoneNumber)) {
             this.setState({ error: { code: 'InvalidPhoneNumber' } });
