@@ -29,6 +29,9 @@ import SupergroupStore from '../../Stores/SupergroupStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './MainMenuButton.css';
 
+import LeaveChatDialog from '../Dialog/LeaveChatDialog';
+import ClearHistoryDialog from '../Dialog/ClearHistoryDialog';
+
 const styles = theme => ({
     menuIconButton: {
         margin: '8px 12px 8px 0'
@@ -44,98 +47,6 @@ const menuTransformOrigin = {
     vertical: 'top',
     horizontal: 'right'
 };
-
-class LeaveChatDialog extends React.Component {
-    getDeleteDialogText = chatId => {
-        const chat = ChatStore.get(chatId);
-        if (!chat) return null;
-        if (!chat.type) return null;
-
-        switch (chat.type['@type']) {
-            case 'chatTypeBasicGroup': {
-                return `Are you sure you want to leave group ${chat.title}?`;
-            }
-            case 'chatTypeSupergroup': {
-                const supergroup = SupergroupStore.get(chat.type.supergroup_id);
-                if (supergroup) {
-                    return supergroup.is_channel
-                        ? `Are you sure you want to leave channel ${chat.title}?`
-                        : `Are you sure you want to leave group ${chat.title}?`;
-                }
-
-                return null;
-            }
-            case 'chatTypePrivate':
-            case 'chatTypeSecret': {
-                return `Are you sure you want to delete chat with ${getChatShortTitle(chatId)}?`;
-            }
-        }
-
-        return null;
-    };
-
-    render() {
-        const { onClose, chatId, ...other } = this.props;
-
-        return (
-            <Dialog
-                transitionDuration={0}
-                onClose={() => onClose(false)}
-                aria-labelledby='delete-dialog-title'
-                {...other}>
-                <DialogTitle id='delete-dialog-title'>{getChatShortTitle(chatId)}</DialogTitle>
-                <DialogContent>
-                    <div className='delete-dialog-content'>
-                        <ChatTileControl chatId={chatId} />
-                        <DialogContentText id='delete-dialog-description'>
-                            {this.getDeleteDialogText(chatId)}
-                        </DialogContentText>
-                    </div>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => onClose(false)} color='primary'>
-                        Cancel
-                    </Button>
-                    <Button onClick={() => onClose(true)} color='primary' autoFocus>
-                        Ok
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        );
-    }
-}
-
-class ClearHistoryDialog extends React.Component {
-    render() {
-        const { onClose, chatId, ...other } = this.props;
-
-        return (
-            <Dialog
-                transitionDuration={0}
-                onClose={() => onClose(false)}
-                aria-labelledby='delete-dialog-title'
-                {...other}>
-                <DialogTitle id='delete-dialog-title'>{getChatShortTitle(chatId)}</DialogTitle>
-                <DialogContent>
-                    <div className='delete-dialog-content'>
-                        <ChatTileControl chatId={chatId} />
-                        <DialogContentText id='delete-dialog-description'>
-                            Are you sure you want clear history?
-                        </DialogContentText>
-                    </div>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => onClose(false)} color='primary'>
-                        Cancel
-                    </Button>
-                    <Button onClick={() => onClose(true)} color='primary' autoFocus>
-                        Ok
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        );
-    }
-}
 
 class MainMenuButton extends React.Component {
     constructor(props) {
