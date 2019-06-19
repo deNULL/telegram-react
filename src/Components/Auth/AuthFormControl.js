@@ -28,13 +28,15 @@ class AuthFormControl extends React.Component {
     constructor(props) {
         super(props);
 
-        this.phone = null;
+        this.phoneCode = null;
+        this.phoneNumber = null;
 
         this.handlePhoneEnter = this.handlePhoneEnter.bind(this);
     }
 
-    handlePhoneEnter(phone) {
-        this.phone = phone;
+    handlePhoneEnter(phoneCode, phoneNumber) {
+        this.phoneCode = phoneCode;
+        this.phoneNumber = phoneNumber;
     }
 
     render() {
@@ -50,7 +52,13 @@ class AuthFormControl extends React.Component {
                 //         <PasswordControl passwordHint='hint' onPasswordEnter={this.handlePasswordEnter} onChangePhone={this.handleChangePhone}/>
                 //         <SignUpControl/>
                 //     </>);
-                control = <SignInControl phone={this.phone} onPhoneEnter={this.handlePhoneEnter} />;
+                control = (
+                    <SignInControl
+                        phoneCode={this.phoneCode}
+                        phoneNumber={this.phoneNumber}
+                        onPhoneEnter={this.handlePhoneEnter}
+                    />
+                );
                 break;
             case 'authorizationStateWaitCode':
                 control = (
