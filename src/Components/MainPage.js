@@ -61,9 +61,13 @@ class MainPage extends React.Component {
         ApplicationStore.on('clientUpdateMediaViewerContent', this.onClientUpdateMediaViewerContent);
         ApplicationStore.on('clientUpdateProfileMediaViewerContent', this.onClientUpdateProfileMediaViewerContent);
         ApplicationStore.on('clientUpdateForward', this.onClientUpdateForward);
+
+        document.addEventListener('keydown', this.handleGlobalKeydown);
     }
 
     componentWillUnmount() {
+        document.removeEventListener('keydown', this.handleGlobalKeydown);
+
         UserStore.removeListener('clientUpdateOpenUser', this.onClientUpdateOpenUser);
         ChatStore.removeListener('clientUpdateOpenChat', this.onClientUpdateOpenChat);
 
@@ -153,6 +157,12 @@ class MainPage extends React.Component {
         });
 
         this.handleSelectChat(chat.id, null, popup);
+    };
+
+    handleGlobalKeydown = event => {
+        if (event.key === 'Escape') {
+            TdLibController.setChatId(0);
+        }
     };
 
     render() {

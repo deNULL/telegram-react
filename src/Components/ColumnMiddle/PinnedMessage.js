@@ -51,7 +51,11 @@ class PinnedMessage extends React.Component {
 
         if (prevPropsChatId !== chatId) {
             const chat = ChatStore.get(chatId);
-            console.log('PinnedMessage.getDerivedStateFromProps', chat, chat.pinned_message_id);
+
+            if (chat) {
+                console.log('PinnedMessage.getDerivedStateFromProps', chat, chat.pinned_message_id);
+            }
+
             return {
                 prevPropsChatId: chatId,
                 messageId: chat && chat.pinned_message_id ? chat.pinned_message_id : 0
