@@ -63,6 +63,11 @@
     box-shadow: 0 0 0 0;
 }
 
+#inputbox-message b,
+#inputbox-message strong {
+    font-weight: 700;
+}
+
 .inputbox-attach-button {
     display: none;
 }

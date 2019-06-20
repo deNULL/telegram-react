@@ -1457,6 +1457,237 @@ function getReplyPhotoSize(chatId, messageId) {
     return null;
 }
 
+function parseHtmlAttrs(attrs) {
+    let map = { style: {} };
+    let match;
+    const attrRegex = new RegExp(
+        '[\\s\\r\\t\\n]*([a-z0-9\\-_]+)[\\s\\r\\t\\n]*=[\\s\\r\\t\\n]*([\'"])((?:\\\\\\2|(?!\\2).)*)\\2',
+        'ig'
+    );
+    while ((match = attrRegex.exec(attrs))) {
+        if (match[1].toLowerCase() === 'style') {
+            for (let prop of match[3].toLowerCase().split(';')) {
+                let pv = prop.split(':');
+                if (pv.length === 2) {
+                    map.style[pv[0].trim()] = pv[1].trim();
+                }
+            }
+        } else {
+            map[match[1].toLowerCase()] = match[3];
+        }
+    }
+    return map;
+}
+
+function cleanupHtml(html) {
+    let cleanHtml;
+    html = html
+        .replace(/<meta((?:\s+[\w-]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^'">\s]+))?)+\s*|\s*)\/?>/gi, '')
+        .replace(/<![^>]*>/gi, '');
+    for (let tag of ['style', 'head', 'script', 'svg']) {
+        html = html.replace(
+            new RegExp(
+                `<${tag}((?:\\s+[\\w-]+(?:\\s*=\\s*(?:"[^"]*"|'[^']*'|[^'">\\s]+))?)+\\s*|\\s*)>.*?</${tag}>`,
+                'igs'
+            ),
+            ''
+        );
+    }
+
+    while (true) {
+        cleanHtml = html.replace(
+            /<([\w-]+)((?:\s+[\w-]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^'">\s]+))?)+\s*|\s*)>([^<]*)<\/[\w-]+>/g,
+            (outer, tag, attrs, inner) => {
+                let { style, href } = parseHtmlAttrs(attrs);
+                tag = tag.toLowerCase();
+                let isBlock,
+                    bullet = '';
+                if (style['display']) {
+                    isBlock = ['grid', 'flex', 'block'].includes(style['display']);
+                } else {
+                    isBlock = [
+                        'address',
+                        'article',
+                        'aside',
+                        'blockquote',
+                        'dd',
+                        'div',
+                        'dl',
+                        'dt',
+                        'fieldset',
+                        'figcaption',
+                        'figure',
+                        'footer',
+                        'form',
+                        'h1',
+                        'h2',
+                        'h3',
+                        'h4',
+                        'h5',
+                        'h6',
+                        'header',
+                        'hr',
+                        'li',
+                        'main',
+                        'nav',
+                        'noscript',
+                        'ol',
+                        'p',
+                        'pre',
+                        'section',
+                        'table',
+                        'tfoot',
+                        'ul',
+                        'video'
+                    ].includes(tag);
+                }
+
+                if (style['display']) {
+                    bullet = style['display'] === 'list-item' ? '• ' : '';
+                } else {
+                    bullet = tag === 'li' ? '• ' : '';
+                }
+
+                if (['h1', 'h2', 'h3', 'h4', 'h5'].includes(tag)) {
+                    return `\x00strong\x01${inner}\x00/strong\x01\x00br/\x01\x00br/\x01`;
+                }
+                if (
+                    ['b', 'strong'].includes(tag) ||
+                    style['font-weight'] >= 500 ||
+                    ['bold', 'bolder'].includes(style['font-weight'])
+                ) {
+                    return `${bullet}\x00strong\x01${inner}\x00/strong\x01${isBlock ? '\x00br/\x01' : ''}`;
+                }
+                if (['i', 'em', 'var', 'cite', 'blockquote'].includes(tag) || style['font-style'] == 'italic') {
+                    return `${bullet}\x00em\x01${inner}\x00/em\x01${isBlock ? '\x00br/\x01' : ''}`;
+                }
+                if (
+                    ['code', 'kbd', 'samp', 'xmp', 'tt'].includes(tag) ||
+                    (!isBlock && style['font-family'] && style['font-family'].indexOf('monospace') > -1)
+                ) {
+                    return `${bullet}\x00code\x01${inner}\x00/code\x01${isBlock ? '\x00br/\x01' : ''}`;
+                }
+                if (
+                    ['pre'].includes(tag) ||
+                    (isBlock && style['font-family'] && style['font-family'].indexOf('monospace') > -1)
+                ) {
+                    return `${bullet}\x00pre\x01${inner}\x00/pre\x01\x00br/\x01`;
+                }
+                if (tag === 'a' && href) {
+                    return `${bullet}\x00a href="${href}"\x01${inner}\x00/a\x01${isBlock ? '\x00br/\x01' : ''}`;
+                }
+                return `${bullet}${inner}${isBlock ? '\x00br/\x01' : ''}${tag === 'p' ? '\x00br/\x01' : ''}`;
+            }
+        );
+        if (cleanHtml === html) {
+            break;
+        }
+        html = cleanHtml;
+    }
+    html = cleanHtml;
+    while (true) {
+        cleanHtml = html.replace(
+            /<\/?([\w-]+)((?:\s+[\w-]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^'">\s]+))?)+\s*|\s*)\/?>/g,
+            (outer, tag) => {
+                tag = tag.toLowerCase();
+                if (['br'].includes(tag)) {
+                    return '<br/>';
+                }
+                return '';
+            }
+        );
+        if (cleanHtml === html) {
+            break;
+        }
+        html = cleanHtml;
+    }
+    html = cleanHtml.replace(/\x00/g, '<').replace(/\x01/g, '>');
+    html = html
+        .replace(/(<br\/>\s*){3,}/gis, '<br/><br/>')
+        .replace(/(<br\/>\s*)*$/, '')
+        .replace(/^(<br\/>\s*)*/, '')
+        .trim();
+    return html;
+}
+
+function htmlToFormattedText(html) {
+    const entitiesMap = {
+        a: 'textEntityTypeTextUrl',
+        b: 'textEntityTypeBold',
+        strong: 'textEntityTypeBold',
+        i: 'textEntityTypeItalic',
+        em: 'textEntityTypeItalic',
+        code: 'textEntityTypeCode',
+        pre: 'textEntityTypePre'
+    };
+
+    const ta = document.createElement('textarea');
+
+    const tagRegex = /<(\/?)(\w+)((?:\s+\w+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^'">\s]+))?)+\s*|\s*)(\/?)>/g;
+    let match,
+        text = '',
+        entities = [];
+    let index = 0,
+        depth = 0;
+    while ((match = tagRegex.exec(html))) {
+        let tag = match[2].toLowerCase();
+        ta.innerHTML = html.substring(index, tagRegex.lastIndex - match[0].length);
+        text += ta.value;
+        index = tagRegex.lastIndex;
+        if (tag === 'br') {
+            text += '\n';
+            continue;
+        }
+        if (match[1] === '/') {
+            if (tag === 'p' || tag === 'div') {
+                text += '\n' + (tag === 'p' ? '\n' : '');
+            }
+            depth--;
+            if (depth === 0) {
+                entities[entities.length - 1].length = text.length - entities[entities.length - 1].offset;
+            }
+            continue;
+        }
+        if (match[4] === '/') {
+            continue;
+        }
+
+        depth++;
+        if (depth === 1 && ['a', 'b', 'strong', 'i', 'em', 'pre', 'code'].includes(tag)) {
+            entities.push({
+                '@type': 'textEntity',
+                offset: text.length,
+                length: 0,
+                type: {
+                    '@type': entitiesMap[tag]
+                }
+            });
+
+            if (tag === 'a') {
+                let { href } = parseHtmlAttrs(match[3]);
+                entities[entities.length - 1].type.url = href;
+            }
+        }
+    }
+
+    if (index < html.length - 1) {
+        ta.innerHTML = html.substring(index);
+        text += ta.value;
+    }
+
+    if (depth > 0) {
+        entities[entities.length - 1].length = text.length - entities[entities.length - 1].offset;
+    }
+
+    //console.log(text, entities);
+
+    return {
+        '@type': 'formattedText',
+        text: text,
+        entities: entities.length ? entities : null
+    };
+}
+
 export {
     getAuthor,
     getTitle,
@@ -1484,5 +1715,7 @@ export {
     hasVideoNote,
     getSearchMessagesFilter,
     openMedia,
-    getReplyPhotoSize
+    getReplyPhotoSize,
+    cleanupHtml,
+    htmlToFormattedText
 };

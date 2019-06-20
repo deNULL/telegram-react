@@ -25,6 +25,7 @@ import IconButton from '@material-ui/core/IconButton';
 import InputBoxHeader from './InputBoxHeader';
 import OutputTypingManager from '../../Utils/OutputTypingManager';
 import { getSize, readImageSize } from '../../Utils/Common';
+import { cleanupHtml, htmlToFormattedText } from '../../Utils/Message';
 import { getChatDraft, getChatDraftReplyToMessageId, isMeChat, isPrivateChat } from '../../Utils/Chat';
 import { borderStyle } from '../Theme';
 import { PHOTO_SIZE } from '../../Constants';
@@ -270,11 +271,7 @@ class InputBoxControl extends Component {
                 reply_to_message_id: replyToMessageId,
                 input_message_text: {
                     '@type': 'inputMessageText',
-                    text: {
-                        '@type': 'formattedText',
-                        text: newDraft,
-                        entities: null
-                    },
+                    text: htmlToFormattedText(newDraft),
                     disable_web_page_preview: true,
                     clear_draft: false
                 }
@@ -297,11 +294,7 @@ class InputBoxControl extends Component {
 
         const content = {
             '@type': 'inputMessageText',
-            text: {
-                '@type': 'formattedText',
-                text: text,
-                entities: null
-            },
+            text: htmlToFormattedText(text),
             disable_web_page_preview: false,
             clear_draft: true
         };
@@ -359,7 +352,7 @@ class InputBoxControl extends Component {
             this.newMessageRef.current.innerHTML = '';
         }
 
-        return innerText;
+        return innerHTML;
     }
 
     handleKeyUp = () => {
@@ -448,12 +441,19 @@ class InputBoxControl extends Component {
             return;
         }
 
+        let html = event.clipboardData.getData('text/html');
+        if (html) {
+            event.preventDefault();
+            document.execCommand('insertHTML', false, cleanupHtml(html));
+            this.innerHTML = html;
+            return;
+        }
+
         const plainText = event.clipboardData.getData('text/plain');
         if (plainText) {
             event.preventDefault();
-            document.execCommand('insertHTML', false, plainText);
+            document.execCommand('insertText', false, plainText);
             this.innerHTML = plainText;
-            return;
         }
     };
 
