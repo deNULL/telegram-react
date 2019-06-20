@@ -119,6 +119,10 @@ pre code {
     word-break: break-word;
 }
 
+.message-text strong {
+    font-weight: 700;
+}
+
 .message-meta {
     user-select: none;
     color: #adadad;
