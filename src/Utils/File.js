@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { getPhotoSize, getPhotoThumbnailSize, getSize } from './Common';
+import { getPhotoSize, getPhotoThumbnailSize, getSize, getBrowser } from './Common';
 import { getChatUserId } from './Chat';
 import { getProfilePhoto } from './User';
 import { getLocationId } from './Message';
@@ -30,7 +30,11 @@ import ChatStore from '../Stores/ChatStore';
 import FileStore from '../Stores/FileStore';
 import MessageStore from '../Stores/MessageStore';
 import UserStore from '../Stores/UserStore';
+import { WebpMachine } from 'webp-hero';
 import TdLibController from '../Controllers/TdLibController';
+
+const webpMachine = new WebpMachine();
+let webpDecodeQueue = [];
 
 function getSizeString(size) {
     if (!size) return `0 B`;
@@ -1544,6 +1548,35 @@ function getExtension(fileName) {
     return parts.pop().toLowerCase();
 }
 
+function isWebpSupported() {
+    return !['IE', 'Safari'].includes(getBrowser());
+}
+
+function decodeWebpBlobToPngUrl(blob) {
+    function decodeNext() {
+        const { data, resolve, reject } = webpDecodeQueue[0];
+        webpMachine.decode(data).then(url => {
+            resolve(url);
+            webpDecodeQueue.shift();
+            if (webpDecodeQueue.length > 0) {
+                decodeNext();
+            }
+        });
+    }
+
+    return new Promise((resolve, reject) => {
+        const fileReader = new FileReader();
+        fileReader.onload = event => {
+            const ab = event.target.result;
+            webpDecodeQueue.push({ data: new Uint8Array(ab), resolve, reject });
+            if (webpDecodeQueue.length === 1) {
+                decodeNext();
+            }
+        };
+        fileReader.readAsArrayBuffer(blob);
+    });
+}
+
 export {
     getFileSize,
     getSizeString,
@@ -1574,5 +1607,7 @@ export {
     getBlob,
     getDownloadedSize,
     getUploadedSize,
-    getExtension
+    getExtension,
+    isWebpSupported,
+    decodeWebpBlobToPngUrl
 };

@@ -7,6 +7,7 @@
 
 import { EventEmitter } from 'events';
 import { getLocationId } from '../Utils/Message';
+import { isWebpSupported, decodeWebpBlobToPngUrl } from '../Utils/File';
 import { FILE_PRIORITY, THUMBNAIL_PRIORITY } from '../Constants';
 import TdLibController from '../Controllers/TdLibController';
 
@@ -858,6 +859,19 @@ class FileStore extends EventEmitter {
     };
 
     updateStickerThumbnailBlob = (chatId, messageId, fileId) => {
+        if (!isWebpSupported()) {
+            const blob = this.getBlob(fileId);
+            decodeWebpBlobToPngUrl(blob).then(url => {
+                this.urls.set(blob, url);
+                this.emit('clientUpdateStickerThumbnailBlob', {
+                    chatId: chatId,
+                    messageId: messageId,
+                    fileId: fileId
+                });
+            });
+            return;
+        }
+
         this.emit('clientUpdateStickerThumbnailBlob', {
             chatId: chatId,
             messageId: messageId,
@@ -866,6 +880,19 @@ class FileStore extends EventEmitter {
     };
 
     updateStickerBlob = (chatId, messageId, fileId) => {
+        if (!isWebpSupported()) {
+            const blob = this.getBlob(fileId);
+            decodeWebpBlobToPngUrl(blob).then(url => {
+                this.urls.set(blob, url);
+                this.emit('clientUpdateStickerBlob', {
+                    chatId: chatId,
+                    messageId: messageId,
+                    fileId: fileId
+                });
+            });
+            return;
+        }
+
         this.emit('clientUpdateStickerBlob', {
             chatId: chatId,
             messageId: messageId,
