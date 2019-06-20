@@ -123,7 +123,7 @@ class SignInControl extends React.Component {
         let { phoneNumber, phoneCode } = this.props;
 
         phoneCode = this.state.phoneCode || phoneCode || '';
-        phoneNumber = this.state.phoneNumber || phoneNumber || '';
+        phoneNumber = this.phoneNumber || phoneNumber || '';
 
         if (isValidPhoneNumber(phoneCode + phoneNumber)) {
             this.setState({ error: null, openConfirmation: true });
@@ -157,7 +157,7 @@ class SignInControl extends React.Component {
     handleKeyPress = event => {
         if (event.key === 'Enter') {
             event.preventDefault();
-            this.handleNext();
+            this.handleDone();
         }
     };
 
@@ -258,7 +258,9 @@ class SignInControl extends React.Component {
                         label={t('YourPhone')}
                         margin='normal'
                         onChange={this.handleNumberChange}
-                        onKeyPress={this.handleKeyPress}
+                        inputProps={{
+                            onKeyPress: this.handleKeyPress
+                        }}
                         defaultValue={phoneNumber}
                     />
                 </div>
