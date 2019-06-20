@@ -80,8 +80,8 @@ class VideoNote extends React.Component {
             //console.log('clientUpdate release video.srcObject');
             player.srcObject = null;
         }
-        if (player.src !== src) {
-            player.src = src;
+        if (player.children[0].src !== src) {
+            player.children[0].src = src;
         }
     }
 
@@ -327,8 +327,9 @@ class VideoNote extends React.Component {
                             playsInline
                             width={style.width}
                             height={style.height}
-                            onCanPlay={this.handleCanPlay}
-                        />
+                            onCanPlay={this.handleCanPlay}>
+                            <source type='video/mp4' />
+                        </video>
                         <div className='video-note-player'>
                             <div className='video-note-progress'>
                                 <CircularProgress

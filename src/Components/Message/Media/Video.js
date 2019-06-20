@@ -49,7 +49,7 @@ class Video extends React.Component {
         };
 
         const file = thumbnail ? thumbnail.photo : null;
-        const blob = file ? FileStore.getBlob(file.id) || file.blob : null;
+        let blob = file ? FileStore.getBlob(file.id) || file.blob : null;
         const src = FileStore.getBlobUrl(blob);
         const isBlurred = isBlurredThumbnail(thumbnail);
 

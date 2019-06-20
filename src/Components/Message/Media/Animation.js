@@ -141,15 +141,15 @@ class Animation extends React.Component {
                         <video
                             ref={this.videoRef}
                             className='media-viewer-content-image'
-                            src={src}
                             poster={thumbnailSrc}
                             muted
                             autoPlay
                             loop
                             playsInline
                             width={style.width}
-                            height={style.height}
-                        />
+                            height={style.height}>
+                            <source src={src} type='video/mp4' />
+                        </video>
                     )
                 ) : (
                     <>

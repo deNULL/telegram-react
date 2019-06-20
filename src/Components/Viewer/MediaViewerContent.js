@@ -253,7 +253,6 @@ class MediaViewerContent extends React.Component {
                     <video
                         ref={this.videoRef}
                         className='media-viewer-content-video-player'
-                        src={src}
                         onClick={this.handleContentClick}
                         controls
                         autoPlay
@@ -289,8 +288,9 @@ class MediaViewerContent extends React.Component {
                                     volume: player.volume
                                 });
                             }
-                        }}
-                    />
+                        }}>
+                        <source src={src} type='video/mp4' />
+                    </video>
                     {!isPlaying &&
                         (!src && thumbnailSrc ? (
                             <img
@@ -318,7 +318,6 @@ class MediaViewerContent extends React.Component {
                 <div className='media-viewer-content-wrapper'>
                     <video
                         className='media-viewer-content-video-player'
-                        src={src}
                         onClick={this.handleContentClick}
                         loop
                         autoPlay
@@ -326,8 +325,9 @@ class MediaViewerContent extends React.Component {
                         height={videoHeight}
                         onPlay={() => {
                             this.setState({ isPlaying: true });
-                        }}
-                    />
+                        }}>
+                        <source src={src} type='video/mp4' />
+                    </video>
                     {!isPlaying &&
                         (!src && thumbnailSrc ? (
                             <img

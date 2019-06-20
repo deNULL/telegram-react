@@ -632,7 +632,6 @@ class HeaderPlayer extends React.Component {
                 <video
                     className='header-player-video'
                     ref={this.videoRef}
-                    src={src}
                     autoPlay={true}
                     controls={false}
                     width={44}
@@ -641,8 +640,9 @@ class HeaderPlayer extends React.Component {
                     onPlay={this.handleVideoPlay}
                     onPause={this.handleVideoPause}
                     onTimeUpdate={this.handleTimeUpdate}
-                    onEnded={this.handleVideoEnded}
-                />
+                    onEnded={this.handleVideoEnded}>
+                    <source src={src} type='video/mp4' />
+                </video>
                 {message && (
                     <div className={classNames(classes.borderColor, 'header-player')}>
                         <IconButton
