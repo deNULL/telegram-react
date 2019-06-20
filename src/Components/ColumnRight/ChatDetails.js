@@ -157,7 +157,7 @@ class ChatDetails extends React.Component {
                 list.scrollTop
             } list.offsetHeight=${list.offsetHeight} list.scrollHeight=${list.scrollHeight}`
         );
-        list.scrollTop = scrollTop + (list.scrollHeight - scrollHeight);
+        //list.scrollTop = scrollTop + (list.scrollHeight - scrollHeight);
         console.log(
             `[ChatDetails] componentDidUpdate after chatId=${chatId} list.scrollTop=${
                 list.scrollTop
