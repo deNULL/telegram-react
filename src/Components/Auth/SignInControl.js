@@ -63,8 +63,10 @@ class SignInControl extends React.Component {
 
         if (props.phoneCode === null) {
             const lang = languageRegionRegexp.exec(navigator.language);
+
+            this.state.countryCode = 'US';
             if (lang && lang[5]) {
-                this.state.countryCode = countryCodesMap[lang[5]];
+                this.state.countryCode = lang[5];
             } else {
                 const countries = CountryLanguage.getLanguageCountries(navigator.language);
                 if (countries && countries.length) {
