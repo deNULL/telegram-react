@@ -1483,7 +1483,8 @@ function cleanupHtml(html) {
     let cleanHtml;
     html = html
         .replace(/<meta((?:\s+[\w-]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^'">\s]+))?)+\s*|\s*)\/?>/gi, '')
-        .replace(/<![^>]*>/gi, '');
+        .replace(/<![^>]*>/gi, '')
+        .replace(/\n/gi, '');
     for (let tag of ['style', 'head', 'script', 'svg']) {
         html = html.replace(
             new RegExp(
@@ -1604,8 +1605,8 @@ function cleanupHtml(html) {
     html = cleanHtml.replace(/\x00/g, '<').replace(/\x01/g, '>');
     html = html
         .replace(/(<br\/>\s*){3,}/gis, '<br/><br/>')
-        .replace(/(<br\/>\s*)*$/, '')
-        .replace(/^(<br\/>\s*)*/, '')
+        .replace(/(<br\/>\s*)*$/gis, '')
+        .replace(/^(<br\/>\s*)*/gis, '')
         .trim();
     return html;
 }
