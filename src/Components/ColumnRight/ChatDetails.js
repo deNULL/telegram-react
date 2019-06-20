@@ -122,7 +122,7 @@ class ChatDetails extends React.Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         const { chatId, theme } = this.props;
-        const { hasGroupsInCommon } = this.state;
+        const { hasGroupsInCommon, members } = this.state;
 
         if (nextProps.chatId !== chatId) {
             return true;
@@ -133,6 +133,10 @@ class ChatDetails extends React.Component {
         }
 
         if (nextState.hasGroupsInCommon !== hasGroupsInCommon) {
+            return true;
+        }
+
+        if (nextState.members !== members) {
             return true;
         }
 
@@ -227,6 +231,8 @@ class ChatDetails extends React.Component {
     handleSelectChat = () => {
         this.getFullInfo();
 
+        this.loadMembers();
+
         this.getGroupsInCommon();
 
         this.loadChatContents();
@@ -238,7 +244,8 @@ class ChatDetails extends React.Component {
         const store = FileStore.getStore();
 
         loadChatsContent(store, [chatId]);
-        const members = getGroupChatMembers(chatId).map(x => x.user_id);
+
+        const members = this.getMembers().map(x => x.user_id);
         loadUsersContent(store, members);
     };
 
@@ -246,6 +253,32 @@ class ChatDetails extends React.Component {
         const { chatId } = this.props;
 
         getChatFullInfo(chatId);
+    };
+
+    loadMembers = async () => {
+        const { chatId } = this.props;
+        this.setState({ members: null });
+
+        const chat = ChatStore.get(chatId);
+        if (!chat) return;
+
+        if (chat.type['@type'] === 'chatTypeSupergroup') {
+            const result = await TdLibController.send({
+                '@type': 'getSupergroupMembers',
+                supergroup_id: chat.type.supergroup_id,
+                limit: 200
+            });
+
+            const store = FileStore.getStore();
+            const members = result.members.map(x => x.user_id);
+            loadUsersContent(store, members);
+            this.setState({ members: result.members });
+        }
+    };
+
+    getMembers = () => {
+        const { chatId } = this.props;
+        return this.state.members || getGroupChatMembers(chatId);
     };
 
     getGroupsInCommon = async () => {
@@ -386,7 +419,7 @@ class ChatDetails extends React.Component {
         const isGroup = isGroupChat(chatId);
         const isMe = isMeChat(chatId);
 
-        const members = getGroupChatMembers(chatId);
+        const members = this.getMembers();
         const users = [];
         this.members = new Map();
         members.forEach(member => {
