@@ -271,6 +271,8 @@ class MessagesList extends React.Component {
         const { chatId } = this.props;
         if (chatId !== message.chat_id) return;
 
+        this.replaceMessage(old_message_id, message, scrollBehavior);
+
         let handleSendSucceeded = false;
         const { content } = message;
         switch (content['@type']) {
@@ -294,7 +296,6 @@ class MessagesList extends React.Component {
         }
 
         console.log('SCROLL MessagesList.onUpdateMessageSendSucceeded scrollBehavior=' + scrollBehavior);
-        this.replaceMessage(old_message_id, message, scrollBehavior);
         const store = FileStore.getStore();
         loadMessageContents(store, [message]);
         MessagesList.viewMessages([message]);
