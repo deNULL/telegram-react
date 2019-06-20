@@ -24,8 +24,15 @@
 
 .sticker-set-item {
     background: transparent;
+    position: relative;
 }
 
 .sticker-set-item-sticker {
     pointer-events: none;
+    position: absolute;
+    margin: auto;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
 }

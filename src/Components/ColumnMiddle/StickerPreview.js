@@ -65,13 +65,13 @@ class StickerPreview extends React.Component {
     };
 
     render() {
-        const { sticker } = this.props;
+        const { sticker, inContainer } = this.props;
         const { emoji } = this.state;
 
         if (!sticker) return null;
 
         return (
-            <div className='sticker-preview'>
+            <div className='sticker-preview' style={{ position: inContainer ? 'absolute' : 'fixed' }}>
                 <div className='sticker-preview-emoji'>{emoji}</div>
                 <Sticker sticker={sticker} displaySize={STICKER_PREVIEW_DISPLAY_SIZE} />
             </div>

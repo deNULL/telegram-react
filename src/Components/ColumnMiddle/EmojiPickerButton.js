@@ -277,7 +277,7 @@ class EmojiPickerButton extends React.Component {
                         {this.picker}
                         {this.stickersPicker}
                     </div>
-                    <StickerPreview sticker={sticker} />
+                    <StickerPreview inContainer={true} sticker={sticker} />
                 </div>
             </>
         );
