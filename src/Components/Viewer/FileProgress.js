@@ -169,6 +169,11 @@ class FileProgress extends React.Component {
         return [wasActive, isActive, isCompleted, progressSize, size];
     };
 
+    handleCancel = event => {
+        const { onCancel } = this.props;
+        onCancel && onCancel();
+    };
+
     render() {
         let { thumbnailSrc, cancelButton, zIndex, icon, completeIcon } = this.props;
         const { file, prevFile } = this.state;
@@ -249,7 +254,7 @@ class FileProgress extends React.Component {
                         />
                     </div>
                     {cancelButton && (
-                        <div className='file-progress-icon'>
+                        <div className='file-progress-icon' onClick={this.handleCancel}>
                             <CloseIcon />
                         </div>
                     )}

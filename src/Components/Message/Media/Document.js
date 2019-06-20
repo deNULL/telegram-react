@@ -12,9 +12,26 @@ import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
 import DocumentTile from '../../Tile/DocumentTile';
 import DocumentAction from './DocumentAction';
 import { getExtension } from '../../../Utils/File';
+import FileStore from '../../../Stores/FileStore';
 import './Document.css';
 
 class Document extends React.Component {
+    handleCancel = () => {
+        const { document, chatId, messageId } = this.props;
+        if (!document) return null;
+
+        const file = document.document;
+        if (!file) return null;
+
+        if (file.local && file.local.is_downloading_active) {
+        } else if (file.remote && file.remote.is_uploading_active) {
+            FileStore.cancelUploadFile(file.id, {
+                chat_id: chatId,
+                id: messageId
+            });
+        }
+    };
+
     render() {
         const { document, openMedia } = this.props;
         if (!document) return null;
@@ -30,6 +47,7 @@ class Document extends React.Component {
                     openMedia={openMedia}
                     icon={<ArrowDownwardIcon />}
                     completeIcon={<InsertDriveFileIcon />}
+                    onCancel={this.handleCancel}
                 />
                 <div className='document-content'>
                     <div className='document-title'>

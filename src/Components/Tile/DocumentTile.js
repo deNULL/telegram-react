@@ -49,7 +49,7 @@ class DocumentTile extends React.Component {
     };
 
     render() {
-        const { classes, thumbnail, file, icon, completeIcon, openMedia } = this.props;
+        const { classes, thumbnail, file, icon, completeIcon, openMedia, onCancel } = this.props;
 
         const thumbnailSrc = getSrc(thumbnail ? thumbnail.photo : null);
         const className = classNames('tile-photo', { 'document-tile-background': !thumbnailSrc });
@@ -71,6 +71,7 @@ class DocumentTile extends React.Component {
                         zIndex={1}
                         icon={icon}
                         completeIcon={completeIcon}
+                        onCancel={onCancel}
                     />
                 )}
             </div>
