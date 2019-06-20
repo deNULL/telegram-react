@@ -336,7 +336,13 @@ class Message extends Component {
 
     handleForward = event => {
         const { chatId, messageId } = this.props;
-        TdLibController.clientUpdate({ '@type': 'clientUpdateForward', chatId: chatId, messageIds: [messageId] });
+        TdLibController.clientUpdate({
+            '@type': 'clientUpdateForward',
+            info: {
+                chatId: chatId,
+                messageIds: [messageId]
+            }
+        });
         this.setState({ contextMenu: false });
     };
 
