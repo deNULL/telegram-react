@@ -28,10 +28,21 @@ import {
     getWebPage,
     openMedia
 } from '../../Utils/Message';
-import { canSendMessages } from '../../Utils/Chat';
+import { canSendMessages, isPrivateChat, getChatShortTitle } from '../../Utils/Chat';
 import { openUser, openChat, selectMessage } from '../../Actions/Client';
 import MessageStore from '../../Stores/MessageStore';
 import TdLibController from '../../Controllers/TdLibController';
+import Popover from '@material-ui/core/Popover';
+import MenuItem from '@material-ui/core/MenuItem';
+import MenuList from '@material-ui/core/MenuList';
+import Button from '@material-ui/core/Button';
+import Checkbox from '@material-ui/core/Checkbox';
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogActions from '@material-ui/core/DialogActions';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 import './Message.css';
 
 const styles = theme => ({
@@ -74,7 +85,7 @@ class Message extends Component {
 
     shouldComponentUpdate(nextProps, nextState) {
         const { theme, chatId, messageId, sendingState, showUnreadSeparator } = this.props;
-        const { contextMenu, selected, highlighted } = this.state;
+        const { contextMenu, selected, highlighted, openDeleteDialog } = this.state;
 
         if (nextProps.theme !== theme) {
             return true;
@@ -97,6 +108,10 @@ class Message extends Component {
         }
 
         if (nextState.contextMenu !== contextMenu) {
+            return true;
+        }
+
+        if (nextState.openDeleteDialog !== openDeleteDialog) {
             return true;
         }
 
@@ -281,9 +296,107 @@ class Message extends Component {
         this.mouseOut = false;
     };
 
+    handleContextMenu = event => {
+        if ((window.getSelection() + '').length > 0) {
+            // Allow user to use the default context menu when he selected some text
+            return;
+        }
+
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+
+        const { contextMenu } = this.state;
+
+        if (contextMenu) {
+            this.setState({ contextMenu: false });
+        } else {
+            this.setState({
+                contextMenu: true,
+                left: event.clientX,
+                top: event.clientY
+            });
+        }
+    };
+
+    handleCloseContextMenu = event => {
+        if (event) {
+            event.stopPropagation();
+        }
+
+        this.setState({ contextMenu: false });
+    };
+
+    handleReply = event => {
+        const { chatId, messageId } = this.props;
+        TdLibController.clientUpdate({ '@type': 'clientUpdateReply', chatId: chatId, messageId: messageId });
+        this.setState({ contextMenu: false });
+    };
+
+    handleForward = event => {
+        const { chatId, messageId } = this.props;
+        TdLibController.clientUpdate({ '@type': 'clientUpdateForward', chatId: chatId, messageIds: [messageId] });
+        this.setState({ contextMenu: false });
+    };
+
+    handleDelete = () => {
+        const { chatId, messageId } = this.props;
+        let canBeDeletedForAllUsers = true;
+        const message = MessageStore.get(chatId, messageId);
+        if (!message || !message.can_be_deleted_for_all_users) {
+            canBeDeletedForAllUsers = false;
+        }
+
+        this.setState({
+            contextMenu: false,
+            openDeleteDialog: true,
+            canBeDeletedForAllUsers: canBeDeletedForAllUsers,
+            revoke: canBeDeletedForAllUsers
+        });
+    };
+
+    handleDeleteContinue = event => {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+
+        const { chatId, messageId } = this.props;
+
+        TdLibController.send({
+            '@type': 'deleteMessages',
+            chat_id: chatId,
+            message_ids: [messageId],
+            revoke: this.state.revoke
+        });
+        this.setState({ openDeleteDialog: false });
+    };
+
+    handleRevokeChange = () => {
+        this.setState({ revoke: !this.state.revoke });
+    };
+
+    handleCloseDelete = event => {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        this.setState({ openDeleteDialog: false });
+    };
+
     render() {
         const { t, classes, chatId, messageId, showUnreadSeparator } = this.props;
-        const { contextMenu, left, top, selected, highlighted } = this.state;
+        const {
+            contextMenu,
+            left,
+            top,
+            selected,
+            highlighted,
+            openDeleteDialog,
+            canBeDeletedForAllUsers,
+            revoke
+        } = this.state;
 
         const message = MessageStore.get(chatId, messageId);
         if (!message) return <div>[empty message]</div>;
@@ -297,6 +410,25 @@ class Message extends Component {
         const media = getMedia(message, this.openMedia);
         this.unread = getUnread(message);
         const senderUserId = getSenderUserId(message);
+
+        let canBeDeleted = true;
+        let canBeForwarded = true;
+        let canBeReplied = true;
+        if (contextMenu) {
+            const message = MessageStore.get(chatId, messageId);
+            if (!message) {
+                canBeDeleted = false;
+                canBeForwarded = false;
+            } else {
+                if (!message.can_be_deleted_only_for_self && !message.can_be_deleted_for_all_users) {
+                    canBeDeleted = false;
+                }
+                if (!message.can_be_forwarded) {
+                    canBeForwarded = false;
+                }
+            }
+            canBeReplied = canSendMessages(chatId);
+        }
 
         const tile = senderUserId ? (
             <UserTileControl userId={senderUserId} onSelect={this.handleSelectUser} />
@@ -320,6 +452,7 @@ class Message extends Component {
                 onMouseOut={this.handleMouseOut}
                 onMouseDown={this.handleMouseDown}
                 onClick={this.handleSelection}
+                onContextMenu={this.handleContextMenu}
                 onAnimationEnd={this.handleAnimationEnd}>
                 {showUnreadSeparator && <UnreadSeparator />}
                 <div className='message-wrapper'>
@@ -356,6 +489,54 @@ class Message extends Component {
                         {webPage && <WebPage chatId={chatId} messageId={messageId} openMedia={this.openMedia} />}
                     </div>
                 </div>
+
+                <Popover
+                    open={contextMenu}
+                    onClose={this.handleCloseContextMenu}
+                    anchorReference='anchorPosition'
+                    anchorPosition={{ top, left }}
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'right'
+                    }}
+                    transformOrigin={{
+                        vertical: 'top',
+                        horizontal: 'left'
+                    }}>
+                    <MenuList onClick={e => e.stopPropagation()}>
+                        {canBeReplied && <MenuItem onClick={this.handleReply}>{t('Reply')}</MenuItem>}
+                        {canBeForwarded && <MenuItem onClick={this.handleForward}>{t('Forward')}</MenuItem>}
+                        {canBeDeleted && <MenuItem onClick={this.handleDelete}>{t('Delete')}</MenuItem>}
+                    </MenuList>
+                </Popover>
+                <Dialog
+                    transitionDuration={0}
+                    open={openDeleteDialog}
+                    onClose={this.handleCloseDelete}
+                    aria-labelledby='delete-dialog-title'>
+                    <DialogTitle id='delete-dialog-title'>Confirm</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText>Are you sure you want to delete 1 message?</DialogContentText>
+                        {canBeDeletedForAllUsers && (
+                            <FormControlLabel
+                                control={
+                                    <Checkbox checked={revoke} onChange={this.handleRevokeChange} color='primary' />
+                                }
+                                label={
+                                    isPrivateChat(chatId) ? `Delete for ${getChatShortTitle(chatId)}` : 'Delete for all'
+                                }
+                            />
+                        )}
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.handleCloseDelete} color='primary'>
+                            Cancel
+                        </Button>
+                        <Button onClick={this.handleDeleteContinue} color='primary'>
+                            Ok
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </div>
         );
     }
