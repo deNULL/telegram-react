@@ -93,7 +93,7 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
 
                     PeopleNum: '%1$d person',
                     PeopleNum_plural: '%1$d people',
-                    PersonAndPerson: '%1$d and %2$d'
+                    PersonAndPerson: '%1$s and %2$s'
                 },
                 emoji: {
                     Search: 'Search',
@@ -149,7 +149,7 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     PeopleNum_0: '%1$d человек',
                     PeopleNum_1: '%1$d человека',
                     PeopleNum_2: '%1$d человек',
-                    PersonAndPerson: '%1$d и %2$d'
+                    PersonAndPerson: '%1$s и %2$s'
                 },
                 emoji: {
                     Search: 'Поиск',
