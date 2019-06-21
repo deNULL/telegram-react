@@ -45,6 +45,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import UserStore from '../../Stores/UserStore';
 import './Message.css';
 
 const styles = theme => ({
@@ -476,6 +477,23 @@ class Message extends Component {
         }
     };
 
+    handleBotClick = event => {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+
+        const { chatId, messageId } = this.props;
+        const message = MessageStore.get(chatId, messageId);
+        if (!message) return;
+
+        const { via_bot_user_id } = message;
+        const bot = UserStore.get(via_bot_user_id);
+
+        // TODO: Paste bot username
+        openUser(via_bot_user_id, true);
+    };
+
     render() {
         const { t, classes, chatId, messageId, showUnreadSeparator } = this.props;
         const {
@@ -492,7 +510,15 @@ class Message extends Component {
         const message = MessageStore.get(chatId, messageId);
         if (!message) return <div>[empty message]</div>;
 
-        const { sending_state, views, edit_date, reply_to_message_id, forward_info, content } = message;
+        const {
+            sending_state,
+            views,
+            edit_date,
+            reply_to_message_id,
+            forward_info,
+            content,
+            via_bot_user_id
+        } = message;
 
         const text = getText(message, this.handleLinkClick);
         const webPage = getWebPage(message);
@@ -514,6 +540,8 @@ class Message extends Component {
             const emojiCount = getEmojiCount(content.text.text);
             emojiClass = emojiCount ? ['emoji-large', 'emoji-medium', 'emoji-small'][emojiCount - 1] : '';
         }
+
+        const bot = via_bot_user_id ? UserStore.get(via_bot_user_id) : null;
 
         let canBeDeleted = true;
         let canBeForwarded = true;
@@ -567,7 +595,18 @@ class Message extends Component {
                     {tile}
                     <div className='message-content'>
                         <div className='message-title'>
-                            {!forward_info && <MessageAuthor chatId={chatId} openChat userId={senderUserId} openUser />}
+                            {!forward_info && (
+                                <div class='message-author'>
+                                    <MessageAuthor chatId={chatId} openChat userId={senderUserId} openUser />
+                                    {(via_bot_user_id && [
+                                        ' via ',
+                                        <a className='message-via-bot' onClick={this.handleBotClick}>
+                                            @{bot.username}
+                                        </a>
+                                    ]) ||
+                                        null}
+                                </div>
+                            )}
                             {forward_info && <Forward forwardInfo={forward_info} />}
                             <div className='message-meta'>
                                 <span>&nbsp;</span>
