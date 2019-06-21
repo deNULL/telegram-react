@@ -20,7 +20,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox/';
 import withStyles from '@material-ui/core/styles/withStyles';
 import { borderStyle } from '../Theme';
-import { canSendMessages, getChatShortTitle, isPrivateChat } from '../../Utils/Chat';
+import { canSendMessages, canPinMessages, getChatShortTitle, isPrivateChat } from '../../Utils/Chat';
 import MessageStore from '../../Stores/MessageStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
@@ -129,6 +129,19 @@ class HeaderCommand extends React.Component {
         TdLibController.clientUpdate({ '@type': 'clientUpdateReply', chatId: chatId, messageId: messageId });
     };
 
+    handlePin = event => {
+        if (MessageStore.selectedItems.size !== 1) return;
+        const { chatId, messageId } = MessageStore.selectedItems.values().next().value;
+
+        TdLibController.send({
+            '@type': 'pinChatMessage',
+            chat_id: chatId,
+            message_id: messageId
+        });
+
+        this.setState({ contextMenu: false });
+    };
+
     render() {
         const { classes, t, count } = this.props;
         const { openDeleteDialog, canBeDeletedForAllUsers, revoke } = this.state;
@@ -162,6 +175,7 @@ class HeaderCommand extends React.Component {
         }
 
         const canBeReplied = count === 1 && canSendMessages(chatId);
+        const canBePinned = count === 1 && canPinMessages(chatId);
 
         return (
             <>
@@ -179,6 +193,11 @@ class HeaderCommand extends React.Component {
                     {canBeReplied && (
                         <Button color='primary' className={classes.buttonLeft} onClick={this.handleReply}>
                             {t('Reply')}
+                        </Button>
+                    )}
+                    {canBePinned && (
+                        <Button color='primary' className={classes.buttonLeft} onClick={this.handlePin}>
+                            {t('PinMessage')}
                         </Button>
                     )}
                     <div className='header-command-space' />

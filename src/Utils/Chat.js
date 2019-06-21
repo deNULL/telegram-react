@@ -1123,6 +1123,85 @@ function canSendMessages(chatId) {
     return false;
 }
 
+function canPinMessages(chatId) {
+    const chat = ChatStore.get(chatId);
+    if (!chat) return false;
+
+    const { type } = chat;
+    if (!type) return false;
+
+    switch (chat.type['@type']) {
+        case 'chatTypeBasicGroup': {
+            const basicGroup = BasicGroupStore.get(type.basic_group_id);
+            if (basicGroup && basicGroup.status) {
+                switch (basicGroup.status['@type']) {
+                    case 'chatMemberStatusAdministrator': {
+                        if (basicGroup.status.can_pin_messages) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                    case 'chatMemberStatusBanned': {
+                        return false;
+                    }
+                    case 'chatMemberStatusCreator': {
+                        return true;
+                    }
+                    case 'chatMemberStatusLeft': {
+                        return false;
+                    }
+                    case 'chatMemberStatusMember': {
+                        return false;
+                    }
+                    case 'chatMemberStatusRestricted': {
+                        return false;
+                    }
+                }
+            }
+
+            break;
+        }
+        case 'chatTypePrivate': {
+            return false;
+        }
+        case 'chatTypeSecret': {
+            return false;
+        }
+        case 'chatTypeSupergroup': {
+            const supergroup = SupergroupStore.get(type.supergroup_id);
+            if (supergroup && supergroup.status) {
+                switch (supergroup.status['@type']) {
+                    case 'chatMemberStatusAdministrator': {
+                        if (supergroup.status.can_pin_messages) {
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                    case 'chatMemberStatusBanned': {
+                        return false;
+                    }
+                    case 'chatMemberStatusCreator': {
+                        return true;
+                    }
+                    case 'chatMemberStatusLeft': {
+                        return false;
+                    }
+                    case 'chatMemberStatusMember': {
+                        return false;
+                    }
+                    case 'chatMemberStatusRestricted': {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+
+    return false;
+}
+
 function showChatDraft(chatId) {
     const chat = ChatStore.get(chatId);
     const draft = getChatDraft(chatId);
@@ -1205,6 +1284,7 @@ export {
     canDeleteChat,
     canSendFiles,
     canSendMessages,
+    canPinMessages,
     canSendPhotos,
     canSendDocuments,
     canSendPolls

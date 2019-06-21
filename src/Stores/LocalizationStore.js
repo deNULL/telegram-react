@@ -108,7 +108,8 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     SearchClear: 'Clear',
 
                     SendFiles: 'Are you sure you want to send files?',
-                    SendFile: 'Are you sure you want to send file?'
+                    SendFile: 'Are you sure you want to send file?',
+                    PinMessage: 'Pin'
                 },
                 emoji: {
                     Search: 'Search',
@@ -180,7 +181,8 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     SearchClear: 'Очистить',
 
                     SendFiles: 'Вы уверены, что хотите отправить файлы?',
-                    SendFile: 'Вы уверены, что хотите отправить файл?'
+                    SendFile: 'Вы уверены, что хотите отправить файл?',
+                    PinMessage: 'Закрепить'
                 },
                 emoji: {
                     Search: 'Поиск',

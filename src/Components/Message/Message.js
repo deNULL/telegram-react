@@ -29,7 +29,7 @@ import {
     getEmojiCount,
     openMedia
 } from '../../Utils/Message';
-import { canSendMessages, isPrivateChat, getChatShortTitle } from '../../Utils/Chat';
+import { canSendMessages, canPinMessages, isPrivateChat, getChatShortTitle } from '../../Utils/Chat';
 import { openUser, openChat, selectMessage } from '../../Actions/Client';
 import MessageStore from '../../Stores/MessageStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
@@ -494,6 +494,18 @@ class Message extends Component {
         openUser(via_bot_user_id, true);
     };
 
+    handlePin = event => {
+        const { chatId, messageId } = this.props;
+
+        TdLibController.send({
+            '@type': 'pinChatMessage',
+            chat_id: chatId,
+            message_id: messageId
+        });
+
+        this.setState({ contextMenu: false });
+    };
+
     render() {
         const { t, classes, chatId, messageId, showUnreadSeparator } = this.props;
         const {
@@ -546,6 +558,7 @@ class Message extends Component {
         let canBeDeleted = true;
         let canBeForwarded = true;
         let canBeReplied = true;
+        let canBePinned = false;
         if (contextMenu) {
             const message = MessageStore.get(chatId, messageId);
             if (!message) {
@@ -560,6 +573,7 @@ class Message extends Component {
                 }
             }
             canBeReplied = canSendMessages(chatId);
+            canBePinned = canPinMessages(chatId);
         }
 
         const tile = senderUserId ? (
@@ -649,6 +663,7 @@ class Message extends Component {
                     <MenuList onClick={e => e.stopPropagation()}>
                         {canBeReplied && <MenuItem onClick={this.handleReply}>{t('Reply')}</MenuItem>}
                         {canBeForwarded && <MenuItem onClick={this.handleForward}>{t('Forward')}</MenuItem>}
+                        {canBePinned && <MenuItem onClick={this.handlePin}>{t('PinMessage')}</MenuItem>}
                         {canBeDeleted && <MenuItem onClick={this.handleDelete}>{t('Delete')}</MenuItem>}
                     </MenuList>
                 </Popover>
@@ -673,10 +688,10 @@ class Message extends Component {
                     </DialogContent>
                     <DialogActions>
                         <Button onClick={this.handleCloseDelete} color='primary'>
-                            Cancel
+                            {t('Cancel')}
                         </Button>
                         <Button onClick={this.handleDeleteContinue} color='primary'>
-                            Ok
+                            {t('OK')}
                         </Button>
                     </DialogActions>
                 </Dialog>
