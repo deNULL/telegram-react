@@ -496,6 +496,14 @@ class InputBoxControl extends Component {
         if (!chatId) return;
         if (!content) return;
 
+        const { hint } = StickerStore;
+        if (hint) {
+            TdLibController.clientUpdate({
+                '@type': 'clientUpdateLocalStickersHint',
+                hint: null
+            });
+        }
+
         try {
             await ApplicationStore.invokeScheduledAction(`clientUpdateClearHistory chatId=${chatId}`);
 
@@ -676,9 +684,7 @@ class InputBoxControl extends Component {
                     <DialogTitle id='delete-dialog-title'>{t('AppName')}</DialogTitle>
                     <DialogContent>
                         <DialogContentText>
-                            {this.files && this.files.length > 1
-                                ? 'Are you sure you want to send files?'
-                                : 'Are you sure you want to send file?'}
+                            {this.files && this.files.length > 1 ? t('SendFiles') : t('SendFile')}
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
@@ -686,7 +692,7 @@ class InputBoxControl extends Component {
                             {t('Cancel')}
                         </Button>
                         <Button onClick={this.handlePasteContinue} color='primary'>
-                            {t('Ok')}
+                            {t('OK')}
                         </Button>
                     </DialogActions>
                 </Dialog>

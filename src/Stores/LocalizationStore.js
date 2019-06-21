@@ -105,7 +105,10 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     NoMessagesFound: 'No messages found',
                     MessagesFound: 'Found %1$d message',
                     MessagesFound_plural: 'Found %1$d messages',
-                    SearchClear: 'Clear'
+                    SearchClear: 'Clear',
+
+                    SendFiles: 'Are you sure you want to send files?',
+                    SendFile: 'Are you sure you want to send file?'
                 },
                 emoji: {
                     Search: 'Search',
@@ -174,7 +177,10 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     MessagesFound_0: 'Найдено %1$d сообщение',
                     MessagesFound_1: 'Найдено %1$d сообщения',
                     MessagesFound_2: 'Найдено %1$d сообщений',
-                    SearchClear: 'Очистить'
+                    SearchClear: 'Очистить',
+
+                    SendFiles: 'Вы уверены, что хотите отправить файлы?',
+                    SendFile: 'Вы уверены, что хотите отправить файл?'
                 },
                 emoji: {
                     Search: 'Поиск',
