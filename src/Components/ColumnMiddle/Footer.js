@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { withTranslation } from 'react-i18next';
 import InputBoxControl from './InputBoxControl';
 import FooterCommand from './FooterCommand';
 import NotificationsCommandControl from './NotificationsCommandControl';
@@ -83,7 +84,7 @@ class Footer extends React.Component {
     };
 
     render() {
-        const { chatId } = this.props;
+        const { chatId, t } = this.props;
         const chat = ChatStore.get(chatId);
         if (!chat) return null;
         if (!chat.type) return null;
@@ -97,7 +98,7 @@ class Footer extends React.Component {
                             return <InputBoxControl />;
                         }
                         case 'chatMemberStatusBanned': {
-                            return <FooterCommand command='delete and exit' onCommand={this.handleDeleteAndExit} />;
+                            return <FooterCommand command={t('DeleteChat')} onCommand={this.handleDeleteAndExit} />;
                         }
                         case 'chatMemberStatusCreator': {
                             return <InputBoxControl />;
@@ -116,7 +117,7 @@ class Footer extends React.Component {
 
                                 return <InputBoxControl />;
                             } else {
-                                return <FooterCommand command='join' onCommand={this.handleJoin} />;
+                                return <FooterCommand command={t('ChannelJoin')} onCommand={this.handleJoin} />;
                             }
                         }
                     }
@@ -138,13 +139,13 @@ class Footer extends React.Component {
                             return <InputBoxControl />;
                         }
                         case 'chatMemberStatusBanned': {
-                            return <FooterCommand command='delete and exit' onCommand={this.handleDeleteAndExit} />;
+                            return <FooterCommand command={t('DeleteChat')} onCommand={this.handleDeleteAndExit} />;
                         }
                         case 'chatMemberStatusCreator': {
                             return <InputBoxControl />;
                         }
                         case 'chatMemberStatusLeft': {
-                            return <FooterCommand command='join' onCommand={this.handleJoin} />;
+                            return <FooterCommand command={t('ChannelJoin')} onCommand={this.handleJoin} />;
                         }
                         case 'chatMemberStatusMember': {
                             if (supergroup.is_channel) {
@@ -161,7 +162,7 @@ class Footer extends React.Component {
 
                                 return <InputBoxControl />;
                             } else {
-                                return <FooterCommand command='join' onCommand={this.handleJoin} />;
+                                return <FooterCommand command={t('ChannelJoin')} onCommand={this.handleJoin} />;
                             }
                         }
                     }
@@ -173,4 +174,4 @@ class Footer extends React.Component {
     }
 }
 
-export default Footer;
+export default withTranslation()(Footer);
