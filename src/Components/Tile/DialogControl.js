@@ -19,12 +19,12 @@ import Popover from '@material-ui/core/Popover';
 import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
 import { openChat } from '../../Actions/Client';
-import { canClearHistory, canDeleteChat, isPrivateChat } from '../../Utils/Chat';
+import { canClearHistory, canDeleteChat, isPrivateChat, isChatMuted } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
 import TdLibController from '../../Controllers/TdLibController';
-import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
+import { MUTED_VALUE_MAX, MUTED_VALUE_MIN, NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import NotificationTimer from '../Additional/NotificationTimer';
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
@@ -157,6 +157,34 @@ class DialogControl extends Component {
         }
 
         this.setState({ contextMenu: false });
+    };
+
+    handleMute = mute => {
+        const { chatId } = this.props;
+        const chat = ChatStore.get(chatId);
+
+        this.setState({ contextMenu: false });
+
+        if (!chat) return;
+        if (!chat.notification_settings) return;
+
+        const isMutedPrev = isChatMuted(chat);
+        if (isMutedPrev === mute) {
+            return;
+        }
+
+        const muteFor = mute ? MUTED_VALUE_MAX : MUTED_VALUE_MIN;
+        const newNotificationSettings = {
+            ...chat.notification_settings,
+            use_default_mute_for: false,
+            mute_for: muteFor
+        };
+
+        TdLibController.send({
+            '@type': 'setChatNotificationSettings',
+            chat_id: chatId,
+            notification_settings: newNotificationSettings
+        });
     };
 
     getLeaveChatTitle = chatId => {
@@ -300,9 +328,11 @@ class DialogControl extends Component {
 
         const currentChatId = ApplicationStore.getChatId();
         const isSelected = currentChatId === chatId;
+        const chat = ChatStore.get(chatId);
         const clearHistory = canClearHistory(chatId);
         const deleteChat = canDeleteChat(chatId);
         const leaveChatTitle = this.getLeaveChatTitle(chatId);
+        const chatMuted = isChatMuted(chat);
 
         return (
             <div
@@ -343,6 +373,12 @@ class DialogControl extends Component {
                         horizontal: 'left'
                     }}>
                     <MenuList onClick={e => e.stopPropagation()}>
+                        {!chatMuted && (
+                            <MenuItem onClick={() => this.handleMute(true)}>{t('MuteNotifications')}</MenuItem>
+                        )}
+                        {chatMuted && (
+                            <MenuItem onClick={() => this.handleMute(false)}>{t('UnmuteNotifications')}</MenuItem>
+                        )}
                         {clearHistory && <MenuItem onClick={this.handleClearHistory}>{t('ClearHistory')}</MenuItem>}
                         {deleteChat && leaveChatTitle && (
                             <MenuItem onClick={this.handleLeave}>{leaveChatTitle}</MenuItem>

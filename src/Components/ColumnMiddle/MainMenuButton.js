@@ -22,8 +22,8 @@ import { withSnackbar } from 'notistack';
 import { compose } from 'recompose';
 import ChatTileControl from '../Tile/ChatTileControl';
 import NotificationTimer from '../Additional/NotificationTimer';
-import { canClearHistory, canDeleteChat, getChatShortTitle, isPrivateChat } from '../../Utils/Chat';
-import { NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
+import { canClearHistory, canDeleteChat, getChatShortTitle, isPrivateChat, isChatMuted } from '../../Utils/Chat';
+import { MUTED_VALUE_MAX, MUTED_VALUE_MIN, NOTIFICATION_AUTO_HIDE_DURATION_MS } from '../../Constants';
 import ApplicationStore from '../../Stores/ApplicationStore';
 import ChatStore from '../../Stores/ChatStore';
 import SupergroupStore from '../../Stores/SupergroupStore';
@@ -71,6 +71,34 @@ class MainMenuButton extends React.Component {
     handleChatInfo = () => {
         this.handleMenuClose();
         setTimeout(() => this.props.openChatDetails(), 150);
+    };
+
+    handleMute = mute => {
+        const chatId = ApplicationStore.getChatId();
+        const chat = ChatStore.get(chatId);
+
+        this.handleMenuClose();
+
+        if (!chat) return;
+        if (!chat.notification_settings) return;
+
+        const isMutedPrev = isChatMuted(chat);
+        if (isMutedPrev === mute) {
+            return;
+        }
+
+        const muteFor = mute ? MUTED_VALUE_MAX : MUTED_VALUE_MIN;
+        const newNotificationSettings = {
+            ...chat.notification_settings,
+            use_default_mute_for: false,
+            mute_for: muteFor
+        };
+
+        TdLibController.send({
+            '@type': 'setChatNotificationSettings',
+            chat_id: chatId,
+            notification_settings: newNotificationSettings
+        });
     };
 
     handleClearHistory = () => {
@@ -215,9 +243,11 @@ class MainMenuButton extends React.Component {
         const { anchorEl, openDelete, openClearHistory } = this.state;
 
         const chatId = ApplicationStore.getChatId();
+        const chat = ChatStore.get(chatId);
         const clearHistory = canClearHistory(chatId);
         const deleteChat = canDeleteChat(chatId);
         const leaveChatTitle = this.getLeaveChatTitle(chatId);
+        const chatMuted = isChatMuted(chat);
 
         return (
             <>
@@ -240,6 +270,10 @@ class MainMenuButton extends React.Component {
                     anchorOrigin={menuAnchorOrigin}
                     transformOrigin={menuTransformOrigin}>
                     <MenuItem onClick={this.handleChatInfo}>{t('ChatInfo')}</MenuItem>
+                    {!chatMuted && <MenuItem onClick={() => this.handleMute(true)}>{t('MuteNotifications')}</MenuItem>}
+                    {chatMuted && (
+                        <MenuItem onClick={() => this.handleMute(false)}>{t('UnmuteNotifications')}</MenuItem>
+                    )}
                     {clearHistory && <MenuItem onClick={this.handleClearHistory}>{t('ClearHistory')}</MenuItem>}
                     {deleteChat && leaveChatTitle && <MenuItem onClick={this.handleLeave}>{leaveChatTitle}</MenuItem>}
                 </Menu>
