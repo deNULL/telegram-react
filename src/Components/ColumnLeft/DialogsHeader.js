@@ -63,14 +63,20 @@ class DialogsHeader extends React.Component {
 
     componentDidMount() {
         ApplicationStore.on('updateAuthorizationState', this.onUpdateAuthorizationState);
+        ApplicationStore.on('clientUpdateSearchHashtag', this.onClientUpdateSearchHashtag);
     }
 
     componentWillUnmount() {
         ApplicationStore.removeListener('updateAuthorizationState', this.onUpdateAuthorizationState);
+        ApplicationStore.removeListener('clientUpdateSearchHashtag', this.onClientUpdateSearchHashtag);
     }
 
     onUpdateAuthorizationState = update => {
         this.setState({ authorizationState: update.authorization_state });
+    };
+
+    onClientUpdateSearchHashtag = update => {
+        this.setState({ text: update.text });
     };
 
     handleLogOut = () => {
@@ -121,7 +127,7 @@ class DialogsHeader extends React.Component {
 
     render() {
         const { classes, onClick, openSearch, t } = this.props;
-        const { open } = this.state;
+        const { open, text } = this.state;
 
         const confirmLogoutDialog = open ? (
             <Dialog transitionDuration={0} open={open} onClose={this.handleClose} aria-labelledby='form-dialog-title'>
@@ -162,8 +168,9 @@ class DialogsHeader extends React.Component {
                                 suppressContentEditableWarning
                                 onKeyDown={this.handleKeyDown}
                                 onKeyUp={this.handleKeyUp}
-                                onPaste={this.handlePaste}
-                            />
+                                onPaste={this.handlePaste}>
+                                {text}
+                            </div>
                         </div>
                     </>
                 )}

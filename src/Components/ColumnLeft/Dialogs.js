@@ -82,7 +82,7 @@ class Dialogs extends Component {
         this.setState({
             openSearch: true,
             searchChatId: update.chatId,
-            searchText: null
+            searchText: update.text || null
         });
     };
 

@@ -82,7 +82,14 @@ class Search extends React.Component {
     }
 
     componentDidMount() {
-        this.loadContent();
+        const { text } = this.props;
+        const trimmedText = text ? text.trim() : '';
+
+        if (!trimmedText) {
+            this.loadContent();
+        } else {
+            this.searchText(trimmedText);
+        }
 
         ApplicationStore.on('clientUpdateSearchText', this.onClientUpdateSearchText);
     }

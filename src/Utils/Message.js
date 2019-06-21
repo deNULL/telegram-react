@@ -99,10 +99,12 @@ function stopPropagation(event) {
     event.stopPropagation();
 }
 
-function getFormattedText(text) {
+function getFormattedText(text, onLinkClick) {
     if (text['@type'] !== 'formattedText') return null;
     if (!text.text) return null;
     if (!text.entities) return text.text;
+
+    onLinkClick = onLinkClick || stopPropagation;
 
     let result = [];
     let index = 0;
@@ -131,7 +133,7 @@ function getFormattedText(text) {
                 result.push(
                     <a
                         key={text.entities[i].offset}
-                        onClick={stopPropagation}
+                        onClick={onLinkClick}
                         href={url}
                         title={url}
                         target='_blank'
@@ -148,7 +150,7 @@ function getFormattedText(text) {
                 result.push(
                     <a
                         key={text.entities[i].offset}
-                        onClick={stopPropagation}
+                        onClick={onLinkClick}
                         href={url}
                         title={url}
                         target='_blank'
@@ -175,8 +177,9 @@ function getFormattedText(text) {
                 );
                 break;
             case 'textEntityTypeMention':
+                let username = entityText.length > 0 && entityText[0] === '@' ? substring(entityText, 1) : entityText;
                 result.push(
-                    <a key={text.entities[i].offset} onClick={stopPropagation} href={`#/im?p=${entityText}`}>
+                    <a key={text.entities[i].offset} onClick={onLinkClick} href={`tg://resolve?domain=${username}`}>
                         {entityText}
                     </a>
                 );
@@ -185,8 +188,8 @@ function getFormattedText(text) {
                 result.push(
                     <a
                         key={text.entities[i].offset}
-                        onClick={stopPropagation}
-                        href={`#/im?p=u${text.entities[i].type.user_id}`}>
+                        onClick={onLinkClick}
+                        href={`tg://user?id=${text.entities[i].type.user_id}`}>
                         {entityText}
                     </a>
                 );
@@ -196,7 +199,7 @@ function getFormattedText(text) {
                 result.push(
                     <a
                         key={text.entities[i].offset}
-                        onClick={stopPropagation}
+                        onClick={onLinkClick}
                         href={`tg://search_hashtag?hashtag=${hashtag}`}>
                         {entityText}
                     </a>
@@ -217,10 +220,7 @@ function getFormattedText(text) {
             case 'textEntityTypeBotCommand':
                 let command = entityText.length > 0 && entityText[0] === '/' ? substring(entityText, 1) : entityText;
                 result.push(
-                    <a
-                        key={text.entities[i].offset}
-                        onClick={stopPropagation}
-                        href={`tg://bot_command?command=${command}&bot=`}>
+                    <a key={text.entities[i].offset} onClick={onLinkClick} href={`tg://bot_command?command=${command}`}>
                         {entityText}
                     </a>
                 );
@@ -243,7 +243,7 @@ function getFormattedText(text) {
     return result;
 }
 
-function getText(message) {
+function getText(message, onLinkClick) {
     if (!message) return null;
 
     let text = [];
@@ -257,12 +257,12 @@ function getText(message) {
         content.text['@type'] === 'formattedText' &&
         content.text.text
     ) {
-        text = getFormattedText(content.text);
+        text = getFormattedText(content.text, onLinkClick);
     } else {
         //text.push('[' + message.content['@type'] + ']');//JSON.stringify(x);
         if (content && content.caption && content.caption['@type'] === 'formattedText' && content.caption.text) {
             text.push('\n');
-            let formattedText = getFormattedText(content.caption);
+            let formattedText = getFormattedText(content.caption, onLinkClick);
             if (formattedText) {
                 text = text.concat(formattedText);
             }
@@ -1506,41 +1506,9 @@ function cleanupHtml(html) {
                 if (style['display']) {
                     isBlock = ['grid', 'flex', 'block'].includes(style['display']);
                 } else {
-                    isBlock = [
-                        'address',
-                        'article',
-                        'aside',
-                        'blockquote',
-                        'dd',
-                        'div',
-                        'dl',
-                        'dt',
-                        'fieldset',
-                        'figcaption',
-                        'figure',
-                        'footer',
-                        'form',
-                        'h1',
-                        'h2',
-                        'h3',
-                        'h4',
-                        'h5',
-                        'h6',
-                        'header',
-                        'hr',
-                        'li',
-                        'main',
-                        'nav',
-                        'noscript',
-                        'ol',
-                        'p',
-                        'pre',
-                        'section',
-                        'table',
-                        'tfoot',
-                        'ul',
-                        'video'
-                    ].includes(tag);
+                    isBlock = 'address article aside blockquote dd div dl dt fieldset figcaption figure footer form h1 h2 h3 h4 h5 h6 header hr li main nav noscript ol p pre section table tfoot ul video'
+                        .split(' ')
+                        .includes(tag);
                 }
 
                 if (style['display']) {

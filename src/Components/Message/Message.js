@@ -31,6 +31,7 @@ import {
 import { canSendMessages, isPrivateChat, getChatShortTitle } from '../../Utils/Chat';
 import { openUser, openChat, selectMessage } from '../../Actions/Client';
 import MessageStore from '../../Stores/MessageStore';
+import ApplicationStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import Popover from '@material-ui/core/Popover';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -391,6 +392,89 @@ class Message extends Component {
         this.setState({ openDeleteDialog: false });
     };
 
+    handleLinkClick = event => {
+        const { chatId, messageId } = this.props;
+
+        if (event) {
+            event.stopPropagation();
+        }
+
+        const href = event.target.href;
+        let match;
+
+        if ((match = href.match(/^(?:https?:\/\/)?(?:t\.me|telegram\.me|telegram\.dog)\/joinchat\/(.+)$/i))) {
+            // private link
+            TdLibController.send({
+                '@type': 'checkChatInviteLink',
+                invite_link: match[0]
+            }).then(result => {
+                if (result.chat_id) {
+                    openChat(result.chat_id, null);
+                } else {
+                    console.log(result); // TODO: show confirmation dialog here
+                    TdLibController.send({
+                        '@type': 'joinChatByInviteLink',
+                        invite_link: match[0]
+                    }).then(result => {
+                        openChat(result.id, null);
+                    });
+                }
+            });
+        } else if (
+            (match = href.match(/^(?:https?:\/\/)?(?:t\.me|telegram\.me|telegram\.dog)\/(.+)$/i)) ||
+            (match = href.match(/^tg:\/\/resolve\?domain=(.+)$/i))
+        ) {
+            // public link
+            // mention by username
+            TdLibController.send({
+                '@type': 'searchPublicChat',
+                username: match[1]
+            }).then(result => {
+                if (result.id) {
+                    openUser(result.id, true);
+                } else {
+                    // TODO: handle not found
+                }
+            });
+        } else if ((match = href.match(/^tg:\/\/user\?id=(.+)$/i))) {
+            // mention by user id
+            openUser(match[1], true);
+        } else if ((match = href.match(/^tg:\/\/search_hashtag\?hashtag=(.+)$/i))) {
+            // hashtag
+            ApplicationStore.emit('clientUpdateSearchChat', { chatId, text: `#${match[1]}` });
+            ApplicationStore.emit('clientUpdateSearchHashtag', { text: `#${match[1]}` });
+        } else if ((match = href.match(/^tg:\/\/bot_command\?command=(.+)$/i))) {
+            // bot command
+            TdLibController.send({
+                '@type': 'sendMessage',
+                chat_id: chatId,
+                input_message_content: {
+                    '@type': 'inputMessageText',
+                    text: {
+                        '@type': 'formattedText',
+                        text: `/${match[1]}`,
+                        entities: null
+                    },
+                    disable_web_page_preview: true,
+                    clear_draft: false
+                }
+            }).then(result => {
+                TdLibController.send({
+                    '@type': 'viewMessages',
+                    chat_id: chatId,
+                    message_ids: [result.id]
+                });
+            });
+        } else {
+            // unrecognized: pass to browser and hope for the best
+            return;
+        }
+
+        if (event) {
+            event.preventDefault();
+        }
+    };
+
     render() {
         const { t, classes, chatId, messageId, showUnreadSeparator } = this.props;
         const {
@@ -409,7 +493,7 @@ class Message extends Component {
 
         const { sending_state, views, edit_date, reply_to_message_id, forward_info } = message;
 
-        const text = getText(message);
+        const text = getText(message, this.handleLinkClick);
         const webPage = getWebPage(message);
         const date = getDate(message);
         const dateHint = getDateHint(message);
