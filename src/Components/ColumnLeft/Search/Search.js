@@ -487,7 +487,7 @@ class Search extends React.Component {
     };
 
     render() {
-        const { classes, chatId } = this.props;
+        const { classes, t, chatId } = this.props;
         const { top, recentlyFound, local, global, messages } = this.state;
 
         const chat = ChatStore.get(chatId);
@@ -539,23 +539,23 @@ class Search extends React.Component {
                   ))
                 : [];
 
-        let messagesCaption = 'No messages found';
+        let messagesCaption = t('NoMessagesFound');
         if (messages && messages.total_count) {
-            messagesCaption = messages.total_count === 1 ? 'Found 1 message' : `Found ${messages.total_count} messages`;
+            messagesCaption = t('MessagesFound', messages.total_count);
         }
 
         return (
             <div ref={this.listRef} className={classNames(classes.search, 'search')} onScroll={this.handleScroll}>
                 {chat && (
                     <div className='search-chat'>
-                        <SearchCaption caption='Search messages in' />
+                        <SearchCaption caption={t('SearchIn')} />
                         <div className='search-chat-wrapper'>
                             <div className='search-chat-control'>
                                 <ChatControl chatId={chatId} showStatus={false} />
                             </div>
                             <IconButton
                                 className={classes.closeSearchIconButton}
-                                aria-label='Search'
+                                aria-label={t('Search')}
                                 onMouseDown={this.handleClose}>
                                 <CloseIcon />
                             </IconButton>
@@ -564,7 +564,7 @@ class Search extends React.Component {
                 )}
                 {topChats.length > 0 && (
                     <div className='search-top-chats'>
-                        <SearchCaption caption='People' />
+                        <SearchCaption caption={t('SearchForPeople')} />
                         <div className='search-top-chats-list' onScroll={this.handleTopChatsScroll}>
                             <div className='search-top-chats-placeholder' />
                             {topChats}
@@ -574,19 +574,23 @@ class Search extends React.Component {
                 )}
                 {recentlyFoundChats.length > 0 && (
                     <div className='search-recently-found-chats'>
-                        <SearchCaption caption='Recent' command='Clear' onClick={this.handleClearRecentlyFound} />
+                        <SearchCaption
+                            caption={t('Recent')}
+                            command={t('SearchClear')}
+                            onClick={this.handleClearRecentlyFound}
+                        />
                         {recentlyFoundChats}
                     </div>
                 )}
                 {localChats.length > 0 && (
                     <div className='search-local-chats'>
-                        <SearchCaption caption='Chats and contacts' />
+                        <SearchCaption caption={t('SearchFriends')} />
                         {localChats}
                     </div>
                 )}
                 {globalChats.length > 0 && (
                     <div className='search-global-chats'>
-                        <SearchCaption caption='Global search' />
+                        <SearchCaption caption={t('GlobalSearch')} />
                         {globalChats}
                     </div>
                 )}

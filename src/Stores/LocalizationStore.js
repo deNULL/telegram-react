@@ -99,7 +99,13 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     ThemeLight: 'Light',
                     ColorAmber: 'Amber',
                     ColorIndigo: 'Indigo',
-                    ColorDeepPurple: 'Deep Purple'
+                    ColorDeepPurple: 'Deep Purple',
+
+                    SearchIn: 'Search messages in',
+                    NoMessagesFound: 'No messages found',
+                    MessagesFound: 'Found %1$d message',
+                    MessagesFound_plural: 'Found %1$d messages',
+                    SearchClear: 'Clear'
                 },
                 emoji: {
                     Search: 'Search',
@@ -161,7 +167,14 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     ThemeLight: 'Светлая',
                     ColorAmber: 'Янтарный',
                     ColorIndigo: 'Индиго',
-                    ColorDeepPurple: 'Пурпурный'
+                    ColorDeepPurple: 'Пурпурный',
+
+                    SearchIn: 'Поиск сообщений в',
+                    NoMessagesFound: 'Сообщения не найдены',
+                    MessagesFound_0: 'Найдено %1$d сообщение',
+                    MessagesFound_1: 'Найдено %1$d сообщения',
+                    MessagesFound_2: 'Найдено %1$d сообщений',
+                    SearchClear: 'Очистить'
                 },
                 emoji: {
                     Search: 'Поиск',
