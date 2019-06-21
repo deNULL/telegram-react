@@ -8,6 +8,8 @@
 import React from 'react';
 import classNames from 'classnames';
 import withStyles from '@material-ui/core/styles/withStyles';
+import { withTranslation } from 'react-i18next';
+import { compose } from 'recompose';
 import './UnreadSeparator.css';
 
 const styles = theme => ({
@@ -18,9 +20,14 @@ const styles = theme => ({
 });
 
 function UnreadSeparator(props) {
-    const { classes } = props;
+    const { classes, t } = props;
 
-    return <div className={classNames('unread-separator', classes.unreadSeparator)}>Unread messages</div>;
+    return <div className={classNames('unread-separator', classes.unreadSeparator)}>{t('UnreadMessages')}</div>;
 }
 
-export default withStyles(styles)(UnreadSeparator);
+const enhance = compose(
+    withTranslation(),
+    withStyles(styles)
+);
+
+export default enhance(UnreadSeparator);
