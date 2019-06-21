@@ -8,6 +8,7 @@
 import React from 'react';
 import { getLastMessageDate } from '../../Utils/Chat';
 import ChatStore from '../../Stores/ChatStore';
+import LocalizationStore from '../../Stores/LocalizationStore';
 import './DialogMetaControl.css';
 
 class DialogMetaControl extends React.Component {
@@ -31,6 +32,7 @@ class DialogMetaControl extends React.Component {
         ChatStore.on('updateChatReadInbox', this.onUpdate);
         ChatStore.on('updateChatUnreadMentionCount', this.onUpdate);
         ChatStore.on('updateMessageMentionRead', this.onUpdate);
+        LocalizationStore.on('clientUpdateLanguageChange', this.onClientUpdateLanguageChange);
     }
 
     componentWillUnmount() {
@@ -41,7 +43,12 @@ class DialogMetaControl extends React.Component {
         ChatStore.removeListener('updateChatReadInbox', this.onUpdate);
         ChatStore.removeListener('updateChatUnreadMentionCount', this.onUpdate);
         ChatStore.removeListener('updateMessageMentionRead', this.onUpdate);
+        LocalizationStore.removeListener('clientUpdateLanguageChange', this.onClientUpdateLanguageChange);
     }
+
+    onClientUpdateLanguageChange = update => {
+        this.forceUpdate();
+    };
 
     onClientUpdateClearHistory = update => {
         const { chatId } = this.props;

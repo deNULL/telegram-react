@@ -13,6 +13,7 @@ import sprintf from 'i18next-sprintf-postprocessor';
 import LocalStorageBackend from 'i18next-localstorage-backend';
 import { initReactI18next } from 'react-i18next';
 import TdLibController from '../Controllers/TdLibController';
+import dateFormat from 'dateformat';
 
 const defaultLanguage = 'en';
 const defaultNamespace = 'translation';
@@ -80,7 +81,15 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     CallCancelled: 'Cancelled',
                     Offline: 'offline',
                     Ago: '%1$s ago',
-                    Now: 'just now'
+                    Now: 'just now',
+
+                    WeekSun: 'Sun',
+                    WeekMon: 'Mon',
+                    WeekTue: 'Tue',
+                    WeekWed: 'Wed',
+                    WeekThu: 'Thu',
+                    WeekFri: 'Fri',
+                    WeekSat: 'Sat'
                 },
                 emoji: {
                     Search: 'Search',
@@ -123,7 +132,15 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     CallCancelled: 'Отменён',
                     Offline: 'не в сети',
                     Ago: '%1$s назад',
-                    Now: 'только что'
+                    Now: 'только что',
+
+                    WeekSun: 'Вс',
+                    WeekMon: 'Пн',
+                    WeekTue: 'Вт',
+                    WeekWed: 'Ср',
+                    WeekThu: 'Чт',
+                    WeekFri: 'Пт',
+                    WeekSat: 'Сб'
                 },
                 emoji: {
                     Search: 'Поиск',
@@ -255,6 +272,14 @@ class LocalizationStore extends EventEmitter {
                     i18n.addResourceBundle(language, defaultNamespace, resources);
 
                     await i18n.changeLanguage(language);
+
+                    dateFormat.i18n.dayNames[0] = i18n.t('WeekSun');
+                    dateFormat.i18n.dayNames[1] = i18n.t('WeekMon');
+                    dateFormat.i18n.dayNames[2] = i18n.t('WeekTue');
+                    dateFormat.i18n.dayNames[3] = i18n.t('WeekWed');
+                    dateFormat.i18n.dayNames[4] = i18n.t('WeekThu');
+                    dateFormat.i18n.dayNames[5] = i18n.t('WeekFri');
+                    dateFormat.i18n.dayNames[6] = i18n.t('WeekSat');
 
                     TdLibController.send({
                         '@type': 'setOption',
