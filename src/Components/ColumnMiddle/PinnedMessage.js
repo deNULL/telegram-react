@@ -175,7 +175,9 @@ class PinnedMessage extends React.Component {
                     <div className={classNames('reply-border', classes.accentBackgroundLight)} />
                     {photoSize && <ReplyTile chatId={chatId} messageId={messageId} photoSize={photoSize} />}
                     <div className='pinned-message-content'>
-                        <div className={classNames('reply-content-title', classes.accentColorMain)}>Pinned message</div>
+                        <div className={classNames('reply-content-title', classes.accentColorMain)}>
+                            {t('PinnedMessage')}
+                        </div>
                         <div className='reply-content-subtitle'>{content}</div>
                     </div>
                     <div className='pinned-message-delete-button'>
