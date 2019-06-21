@@ -20,9 +20,10 @@ import Venue from '../Components/Message/Media/Venue';
 import Video from '../Components/Message/Media/Video';
 import VideoNote from '../Components/Message/Media/VideoNote';
 import VoiceNote from '../Components/Message/Media/VoiceNote';
+import Call from '../Components/Message/Media/Call';
 import { getChatTitle } from './Chat';
 import { openUser } from './../Actions/Client';
-import { getPhotoSize, getSize } from './Common';
+import { getPhotoSize, getSize, getDurationApproximateString } from './Common';
 import { download, saveOrDownload } from './File';
 import { getAudioTitle } from './Media';
 import { getServiceMessageContent } from './ServiceMessage';
@@ -331,6 +332,8 @@ function getMedia(message, openMedia) {
             return <VideoNote chatId={chat_id} messageId={id} videoNote={content.video_note} openMedia={openMedia} />;
         case 'messageVoiceNote':
             return <VoiceNote chatId={chat_id} messageId={id} voiceNote={content.voice_note} openMedia={openMedia} />;
+        case 'messageCall':
+            return <Call chatId={chat_id} messageId={id} call={message} openMedia={openMedia} />;
         default:
             return '[' + content['@type'] + ']';
     }
@@ -414,6 +417,26 @@ function filterMessages(result, history) {
     result.messages = result.messages.filter(x => !map.has(x.id));
 }
 
+function isMessageCallCancelled(call) {
+    return ['callDiscardReasonMissed', 'callDiscardReasonDeclined'].includes(call.discard_reason['@type']);
+}
+
+function getMessageCallType(message, t) {
+    if (message.is_outgoing) {
+        if (isMessageCallCancelled(message.content)) {
+            return t('CallMessageOutgoingMissed');
+        } else {
+            return t('CallMessageOutgoing');
+        }
+    } else {
+        if (isMessageCallCancelled(message.content)) {
+            return t('CallMessageIncomingMissed');
+        } else {
+            return t('CallMessageIncoming');
+        }
+    }
+}
+
 function getContent(message, t = key => key) {
     if (!message) return null;
 
@@ -440,7 +463,9 @@ function getContent(message, t = key => key) {
             return getServiceMessageContent(message);
         }
         case 'messageCall': {
-            return t('Call') + caption;
+            const callType = getMessageCallType(message, t);
+            const duration = getDurationApproximateString(content.duration, t);
+            return duration ? t('CallMessageWithDuration', callType, duration) : callType;
         }
         case 'messageChatAddMembers': {
             return getServiceMessageContent(message);
@@ -1686,5 +1711,7 @@ export {
     openMedia,
     getReplyPhotoSize,
     cleanupHtml,
-    htmlToFormattedText
+    htmlToFormattedText,
+    getMessageCallType,
+    isMessageCallCancelled
 };

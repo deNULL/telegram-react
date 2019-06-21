@@ -9,6 +9,7 @@ import { EventEmitter } from 'events';
 import Cookies from 'universal-cookie';
 import i18n from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
+import sprintf from 'i18next-sprintf-postprocessor';
 import LocalStorageBackend from 'i18next-localstorage-backend';
 import { initReactI18next } from 'react-i18next';
 import TdLibController from '../Controllers/TdLibController';
@@ -33,7 +34,29 @@ const language = cookies.get('i18next') || defaultLanguage;
 //     caches: ['localStorage', 'cookie']
 // };
 
+let overloadTranslationOptionHandler = args => {
+    if (args.length > 1 && args[1] instanceof Array) {
+        let options = args.length > 2 ? args[2] : {};
+        options.postProcess = 'sprintf';
+        options.sprintf = args[1];
+        return options;
+    } else {
+        let values = [];
+
+        for (var i = 1; i < args.length; i++) {
+            values.push(args[i]);
+        }
+
+        return {
+            postProcess: 'sprintf',
+            sprintf: values,
+            count: values[0]
+        };
+    }
+};
+
 i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react-i18next
+    .use(sprintf)
     .init({
         //detection: detection,
         ns: [defaultNamespace, 'local'],
@@ -51,8 +74,10 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     SendMessage: 'Send Message',
                     ChatInfo: 'Chat Info',
                     ChannelInfo: 'Channel Info',
-                    Stickers: 'STICKERS',
-                    Emoji: 'EMOJI'
+                    StickersTab: 'STICKERS',
+                    EmojiTab: 'EMOJI',
+
+                    CallCancelled: 'Cancelled'
                 },
                 emoji: {
                     Search: 'Search',
@@ -89,12 +114,14 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     SendMessage: 'Отправить сообщение',
                     ChatInfo: 'Информация о чате',
                     ChannelInfo: 'Информация о канале',
-                    Stickers: 'СТИКЕРЫ',
-                    Emoji: 'ЕМОДЗИ'
+                    StickersTab: 'СТИКЕРЫ',
+                    EmojiTab: 'ЭМОДЗИ',
+
+                    CallCancelled: 'Отменён'
                 },
                 emoji: {
                     Search: 'Поиск',
-                    NotEmojiFound: 'Емодзи не найдены',
+                    NotEmojiFound: 'Эмодзи не найдены',
                     ChooseDefaultSkinTone: 'Выберите тон кожи по умолчанию',
                     SearchResults: 'Результаты поиска',
                     Recent: 'Часто используемые',
@@ -123,7 +150,8 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
         },
         react: {
             wait: false
-        }
+        },
+        overloadTranslationOptionHandler
     });
 
 const cache = new LocalStorageBackend(null, {
@@ -249,7 +277,19 @@ class LocalizationStore extends EventEmitter {
                     break;
                 }
                 case 'languagePackStringValuePluralized': {
-                    //result[strings[i].key] = value.value;
+                    // TODO: this mapping is probably broken for many, many languages
+                    // Using indexes instead of unicode plural categories is a terrible practice
+                    result[strings[i].key] = result[strings[i].key + '_0'] = value.one_value;
+
+                    if (value.few_value) {
+                        result[strings[i].key + '_1'] = value.few_value;
+                    }
+                    if (value.other_value) {
+                        result[strings[i].key + '_plural'] = result[strings[i].key + '_2'] = value.other_value;
+                    }
+                    if (value.many_value) {
+                        result[strings[i].key + '_2'] = value.many_value;
+                    }
                     break;
                 }
                 case 'languagePackStringValueDeleted': {

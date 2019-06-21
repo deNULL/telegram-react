@@ -359,6 +359,20 @@ function getDurationString(secondsTotal) {
     return (hours > 0 ? hours + ':' : '') + minutes + ':' + seconds;
 }
 
+function getDurationApproximateString(secondsTotal, t) {
+    // TODO: localization
+    if (secondsTotal > 3600) {
+        const hours = Math.round(secondsTotal / 3600);
+        return t('Hours', hours);
+    } else if (secondsTotal > 60) {
+        const minutes = Math.round(secondsTotal / 60);
+        return t('Minutes', minutes);
+    } else if (secondsTotal > 0) {
+        return t('Seconds', secondsTotal);
+    }
+    return '';
+}
+
 function getRandomInt(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
@@ -385,5 +399,6 @@ export {
     isAuthorizationReady,
     between,
     getDurationString,
+    getDurationApproximateString,
     getRandomInt
 };

@@ -264,13 +264,13 @@ class EmojiPickerButton extends React.Component {
                             color={tab === 0 ? 'primary' : 'default'}
                             className={classes.headerButton}
                             onClick={this.handleEmojiClick}>
-                            {t('Emoji')}
+                            {t('EmojiTab')}
                         </Button>
                         <Button
                             color={tab === 1 ? 'primary' : 'default'}
                             className={classes.headerButton}
                             onClick={this.handleStickersClick}>
-                            {t('Stickers')}
+                            {t('StickersTab')}
                         </Button>
                     </div>
                     <div className={classNames('emoji-picker-content', { 'emoji-picker-content-stickers': tab === 1 })}>

@@ -20,6 +20,7 @@
     "i18next": "^15.0.7",
     "i18next-browser-languagedetector": "^3.0.1",
     "i18next-localstorage-backend": "^2.1.2",
+    "i18next-sprintf-postprocessor": "^0.2.2",
     "libphonenumber-js": "^1.7.13",
     "lint-staged": "^8.1.5",
     "localforage": "^1.7.3",

@@ -1,0 +1,13 @@
+.call {
+    display: flex;
+    align-items: center;
+}
+
+.call-content {
+    margin-left: 5px;
+}
+
+.call-duration {
+    font-size: 13px;
+    opacity: 0.6;
+}
