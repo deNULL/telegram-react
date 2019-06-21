@@ -138,6 +138,9 @@ function getFitSize(size, max, increaseToMax = true) {
 function itemsInView(scrollContainerRef, itemsContainerRef) {
     let scrollContainer = scrollContainerRef.current;
     let itemsContainer = itemsContainerRef ? itemsContainerRef.current : scrollContainer;
+    if (!itemsContainer) {
+        return [];
+    }
 
     const items = [];
     for (let i = 0; i < itemsContainer.children.length; i++) {
