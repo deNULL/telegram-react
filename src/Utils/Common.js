@@ -379,6 +379,31 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 }
 
+let visibilityHidden, visibilityChange;
+if (typeof document.hidden !== 'undefined') {
+    // Opera 12.10 and Firefox 18 and later support
+    visibilityHidden = 'hidden';
+    visibilityChange = 'visibilitychange';
+} else if (typeof document.msHidden !== 'undefined') {
+    visibilityHidden = 'msHidden';
+    visibilityChange = 'msvisibilitychange';
+} else if (typeof document.webkitHidden !== 'undefined') {
+    visibilityHidden = 'webkitHidden';
+    visibilityChange = 'webkitvisibilitychange';
+}
+
+function addVisibilityHandler(handler) {
+    document.addEventListener(visibilityChange, handler, false);
+}
+
+function removeVisibilityHandler(handler) {
+    document.removeEventListener(visibilityChange, handler, false);
+}
+
+function isDocumentVisible() {
+    return !document[visibilityHidden];
+}
+
 export {
     getBrowser,
     getOSName,
@@ -400,5 +425,8 @@ export {
     between,
     getDurationString,
     getDurationApproximateString,
-    getRandomInt
+    getRandomInt,
+    addVisibilityHandler,
+    removeVisibilityHandler,
+    isDocumentVisible
 };

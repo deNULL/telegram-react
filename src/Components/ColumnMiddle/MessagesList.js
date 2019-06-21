@@ -14,7 +14,15 @@ import Message from '../Message/Message';
 import PinnedMessage from './PinnedMessage';
 import ServiceMessage from '../Message/ServiceMessage';
 import StickersHint from './StickersHint';
-import { debounce, throttle, getPhotoSize, itemsInView } from '../../Utils/Common';
+import {
+    debounce,
+    throttle,
+    getPhotoSize,
+    itemsInView,
+    addVisibilityHandler,
+    removeVisibilityHandler,
+    isDocumentVisible
+} from '../../Utils/Common';
 import { loadChatsContent, loadDraftContent, loadMessageContents } from '../../Utils/File';
 import { filterMessages } from '../../Utils/Message';
 import { isServiceMessage } from '../../Utils/ServiceMessage';
@@ -66,6 +74,8 @@ class MessagesList extends React.Component {
         this.itemsRef = React.createRef();
 
         this.itemsMap = new Map();
+
+        this.pendingViewMessages = [];
 
         this.updateItemsInView = throttle(this.updateItemsInView, 500);
         //debounce(this.updateItemsInView, 250);
@@ -181,6 +191,8 @@ class MessagesList extends React.Component {
         PlayerStore.on('clientUpdateMediaActive', this.onClientUpdateMediaActive);
         PlayerStore.on('clientUpdateMediaEnding', this.onClientUpdateMediaEnding);
         PlayerStore.on('clientUpdateMediaEnd', this.onClientUpdateMediaEnd);
+
+        addVisibilityHandler(this.onChangeDocumentVisibility);
     }
 
     componentWillUnmount() {
@@ -196,7 +208,16 @@ class MessagesList extends React.Component {
         PlayerStore.removeListener('clientUpdateMediaActive', this.onClientUpdateMediaActive);
         PlayerStore.removeListener('clientUpdateMediaEnding', this.onClientUpdateMediaEnding);
         PlayerStore.removeListener('clientUpdateMediaEnd', this.onClientUpdateMediaEnd);
+
+        removeVisibilityHandler(this.onChangeDocumentVisibility);
     }
+
+    onChangeDocumentVisibility = () => {
+        if (isDocumentVisible() && this.pendingViewMessages.length) {
+            MessagesList.viewMessages(this.pendingViewMessages);
+            this.pendingViewMessages = [];
+        }
+    };
 
     onClientUpdateMediaActive = update => {
         const list = this.listRef.current;
@@ -309,14 +330,17 @@ class MessagesList extends React.Component {
         if (chatId !== message.chat_id) return;
 
         let scrollBehavior = ScrollBehaviorEnum.NONE;
-        const list = this.listRef.current;
-        // at the end of list
-        if (list.scrollTop === list.scrollHeight - list.offsetHeight) {
-            scrollBehavior = ScrollBehaviorEnum.SCROLL_TO_BOTTOM;
-        }
-        // sent message
-        else if (message.is_outgoing) {
-            scrollBehavior = ScrollBehaviorEnum.SCROLL_TO_BOTTOM;
+
+        if (isDocumentVisible()) {
+            const list = this.listRef.current;
+            // at the end of list
+            if (list.scrollTop === list.scrollHeight - list.offsetHeight) {
+                scrollBehavior = ScrollBehaviorEnum.SCROLL_TO_BOTTOM;
+            }
+            // sent message
+            else if (message.is_outgoing) {
+                scrollBehavior = ScrollBehaviorEnum.SCROLL_TO_BOTTOM;
+            }
         }
 
         const history = [message];
@@ -325,7 +349,12 @@ class MessagesList extends React.Component {
         this.insertAfter(this.filterMessages(history), scrollBehavior);
         const store = FileStore.getStore();
         loadMessageContents(store, history);
-        MessagesList.viewMessages(history);
+
+        if (isDocumentVisible()) {
+            MessagesList.viewMessages(history);
+        } else {
+            this.pendingViewMessages.push(message);
+        }
     };
 
     onUpdateDeleteMessages = update => {
