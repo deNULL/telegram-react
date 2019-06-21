@@ -10,30 +10,32 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
 import ChatTileControl from '../Tile/ChatTileControl';
+import { withTranslation } from 'react-i18next';
 
 class LeaveChatDialog extends React.Component {
     getDeleteDialogText = chatId => {
+        const { t } = this.props;
         const chat = ChatStore.get(chatId);
         if (!chat) return null;
         if (!chat.type) return null;
 
         switch (chat.type['@type']) {
             case 'chatTypeBasicGroup': {
-                return `Are you sure you want to leave group ${chat.title}?`;
+                return t('MegaLeaveAlertWithName', chat.title);
             }
             case 'chatTypeSupergroup': {
                 const supergroup = SupergroupStore.get(chat.type.supergroup_id);
                 if (supergroup) {
                     return supergroup.is_channel
-                        ? `Are you sure you want to leave channel ${chat.title}?`
-                        : `Are you sure you want to leave group ${chat.title}?`;
+                        ? t('ChannelLeaveAlertWithName', chat.title)
+                        : t('MegaLeaveAlertWithName', chat.title);
                 }
 
                 return null;
             }
             case 'chatTypePrivate':
             case 'chatTypeSecret': {
-                return `Are you sure you want to delete chat with ${getChatShortTitle(chatId)}?`;
+                return t('AreYouSureDeleteThisChatWithUser', getChatShortTitle(chatId));
             }
         }
 
@@ -41,7 +43,7 @@ class LeaveChatDialog extends React.Component {
     };
 
     render() {
-        const { onClose, chatId, ...other } = this.props;
+        const { onClose, chatId, t, ...other } = this.props;
 
         return (
             <Dialog
@@ -60,10 +62,10 @@ class LeaveChatDialog extends React.Component {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => onClose(false)} color='primary'>
-                        Cancel
+                        {t('Cancel')}
                     </Button>
                     <Button onClick={() => onClose(true)} color='primary' autoFocus>
-                        Ok
+                        {t('OK')}
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -71,4 +73,4 @@ class LeaveChatDialog extends React.Component {
     }
 }
 
-export default LeaveChatDialog;
+export default withTranslation()(LeaveChatDialog);

@@ -316,6 +316,9 @@ class LocalizationStore extends EventEmitter {
     };
 
     processStrings = (lng, languagePackStrings) => {
+        function processString(value) {
+            return value.replace(/\*\*/g, ''); // TODO: enable bold font in localized strings
+        }
         if (!languagePackStrings) return {};
         const { strings } = languagePackStrings;
         if (!strings) return {};
@@ -325,22 +328,24 @@ class LocalizationStore extends EventEmitter {
             const { value } = strings[i];
             switch (value['@type']) {
                 case 'languagePackStringValueOrdinary': {
-                    result[strings[i].key] = value.value;
+                    result[strings[i].key] = processString(value.value);
                     break;
                 }
                 case 'languagePackStringValuePluralized': {
                     // TODO: this mapping is probably broken for many, many languages
                     // Using indexes instead of unicode plural categories is a terrible practice
-                    result[strings[i].key] = result[strings[i].key + '_0'] = value.one_value;
+                    result[strings[i].key] = result[strings[i].key + '_0'] = processString(value.one_value);
 
                     if (value.few_value) {
-                        result[strings[i].key + '_1'] = value.few_value;
+                        result[strings[i].key + '_1'] = processString(value.few_value);
                     }
                     if (value.other_value) {
-                        result[strings[i].key + '_plural'] = result[strings[i].key + '_2'] = value.other_value;
+                        result[strings[i].key + '_plural'] = result[strings[i].key + '_2'] = processString(
+                            value.other_value
+                        );
                     }
                     if (value.many_value) {
-                        result[strings[i].key + '_2'] = value.many_value;
+                        result[strings[i].key + '_2'] = processString(value.many_value);
                     }
                     break;
                 }

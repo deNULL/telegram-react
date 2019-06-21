@@ -9,6 +9,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import withStyles from '@material-ui/core/styles/withStyles';
+import { withTranslation } from 'react-i18next';
 import ChatTileControl from './ChatTileControl';
 import DialogContentControl from './DialogContentControl';
 import DialogBadgeControl from './DialogBadgeControl';
@@ -159,25 +160,26 @@ class DialogControl extends Component {
     };
 
     getLeaveChatTitle = chatId => {
+        const { t } = this.props;
         const chat = ChatStore.get(chatId);
         if (!chat) return null;
         if (!chat.type) return null;
 
         switch (chat.type['@type']) {
             case 'chatTypeBasicGroup': {
-                return 'Delete and exit';
+                return t('DeleteChat');
             }
             case 'chatTypeSupergroup': {
                 const supergroup = SupergroupStore.get(chat.type.supergroup_id);
                 if (supergroup) {
-                    return supergroup.is_channel ? 'Leave channel' : 'Leave group';
+                    return supergroup.is_channel ? t('LeaveChannelMenu') : t('LeaveMegaMenu');
                 }
 
                 return null;
             }
             case 'chatTypePrivate':
             case 'chatTypeSecret': {
-                return 'Delete conversation';
+                return t('DeleteChatUser');
             }
         }
 
@@ -189,12 +191,13 @@ class DialogControl extends Component {
     };
 
     handleClearHistoryContinue = result => {
+        const { t } = this.props;
         this.setState({ openClearHistory: false });
 
         if (!result) return;
 
         const chatId = this.props.chatId;
-        const message = 'Messages deleted';
+        const message = t('HistoryClearedUndo');
         const request = {
             '@type': 'deleteChatHistory',
             chat_id: chatId,
@@ -223,6 +226,7 @@ class DialogControl extends Component {
     };
 
     handleScheduledAction = (chatId, clientUpdateType, message, request) => {
+        const { t } = this.props;
         if (!clientUpdateType) return;
 
         const key = `${clientUpdateType} chatId=${chatId}`;
@@ -254,7 +258,7 @@ class DialogControl extends Component {
                         color='primary'
                         size='small'
                         onClick={() => ApplicationStore.removeScheduledAction(key)}>
-                        UNDO
+                        {t('Undo')}
                     </Button>
                 ]
             });
@@ -262,33 +266,34 @@ class DialogControl extends Component {
     };
 
     getLeaveChatNotification = chatId => {
+        const { t } = this.props;
         const chat = ChatStore.get(chatId);
-        if (!chat) return 'Chat deleted';
-        if (!chat.type) return 'Chat deleted';
+        if (!chat) return t('ChatDeletedUndo');
+        if (!chat.type) return t('ChatDeletedUndo');
 
         switch (chat.type['@type']) {
             case 'chatTypeBasicGroup': {
-                return 'Chat deleted';
+                return t('ChatDeletedUndo');
             }
             case 'chatTypeSupergroup': {
                 const supergroup = SupergroupStore.get(chat.type.supergroup_id);
                 if (supergroup) {
-                    return supergroup.is_channel ? 'Left channel' : 'Left group';
+                    return supergroup.is_channel ? t('ChannelDeletedUndo') : t('GroupDeletedUndo');
                 }
 
-                return 'Chat deleted';
+                return t('ChatDeletedUndo');
             }
             case 'chatTypePrivate':
             case 'chatTypeSecret': {
-                return 'Chat deleted';
+                return t('ChatDeletedUndo');
             }
         }
 
-        return 'Chat deleted';
+        return t('ChatDeletedUndo');
     };
 
     render() {
-        const { classes, chatId, showSavedMessages, hidden } = this.props;
+        const { classes, chatId, t, showSavedMessages, hidden } = this.props;
         const { left, top, contextMenu, openDelete, openClearHistory } = this.state;
 
         if (hidden) return null;
@@ -338,7 +343,7 @@ class DialogControl extends Component {
                         horizontal: 'left'
                     }}>
                     <MenuList onClick={e => e.stopPropagation()}>
-                        {clearHistory && <MenuItem onClick={this.handleClearHistory}>Clear history</MenuItem>}
+                        {clearHistory && <MenuItem onClick={this.handleClearHistory}>{t('ClearHistory')}</MenuItem>}
                         {deleteChat && leaveChatTitle && (
                             <MenuItem onClick={this.handleLeave}>{leaveChatTitle}</MenuItem>
                         )}
@@ -364,6 +369,7 @@ DialogControl.defaultProps = {
 
 const enhance = compose(
     withStyles(styles, { withTheme: true }),
+    withTranslation(),
     withSnackbar
 );
 

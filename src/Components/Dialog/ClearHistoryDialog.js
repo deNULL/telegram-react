@@ -8,10 +8,11 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
 import ChatTileControl from '../Tile/ChatTileControl';
+import { withTranslation } from 'react-i18next';
 
 class ClearHistoryDialog extends React.Component {
     render() {
-        const { onClose, chatId, ...other } = this.props;
+        const { onClose, chatId, t, ...other } = this.props;
 
         return (
             <Dialog
@@ -24,16 +25,16 @@ class ClearHistoryDialog extends React.Component {
                     <div className='delete-dialog-content'>
                         <ChatTileControl chatId={chatId} />
                         <DialogContentText id='delete-dialog-description'>
-                            Are you sure you want clear history?
+                            {t('AreYouSureClearHistory')}
                         </DialogContentText>
                     </div>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => onClose(false)} color='primary'>
-                        Cancel
+                        {t('Cancel')}
                     </Button>
                     <Button onClick={() => onClose(true)} color='primary' autoFocus>
-                        Ok
+                        {t('OK')}
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -41,4 +42,4 @@ class ClearHistoryDialog extends React.Component {
     }
 }
 
-export default ClearHistoryDialog;
+export default withTranslation()(ClearHistoryDialog);
