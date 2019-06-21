@@ -31,10 +31,7 @@ class Poll extends React.Component {
     };
 
     getTotalVoterCountString = (count, t = key => key) => {
-        if (!count) return t('NoVotes');
-        if (count === 1) return '1 vote';
-
-        return count + ' votes';
+        return count ? t('Vote', count) : t('NoVotes');
     };
 
     handleVote = index => {
