@@ -89,7 +89,11 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     WeekWed: 'Wed',
                     WeekThu: 'Thu',
                     WeekFri: 'Fri',
-                    WeekSat: 'Sat'
+                    WeekSat: 'Sat',
+
+                    PeopleNum: '%1$d person',
+                    PeopleNum_plural: '%1$d people',
+                    PersonAndPerson: '%1$d and %2$d'
                 },
                 emoji: {
                     Search: 'Search',
@@ -140,7 +144,12 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     WeekWed: 'Ср',
                     WeekThu: 'Чт',
                     WeekFri: 'Пт',
-                    WeekSat: 'Сб'
+                    WeekSat: 'Сб',
+
+                    PeopleNum_0: '%1$d человек',
+                    PeopleNum_1: '%1$d человека',
+                    PeopleNum_2: '%1$d человек',
+                    PersonAndPerson: '%1$d и %2$d'
                 },
                 emoji: {
                     Search: 'Поиск',

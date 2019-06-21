@@ -7,6 +7,7 @@
 
 import React from 'react';
 import dateFormat from 'dateformat';
+import { t } from 'i18next';
 import { getUserFullName, getUserShortName, getUserStatus, isUserOnline } from './User';
 import { getSupergroupStatus } from './Supergroup';
 import { getBasicGroupStatus } from './BasicGroup';
@@ -26,7 +27,7 @@ function getGroupChatTypingString(inputTypingManager) {
 
     let size = inputTypingManager.actions.size;
     if (size > 2) {
-        return `${size} people are typing`;
+        return t('AreTypingGroup', t('PeopleNum', size));
     } else if (size > 1) {
         let firstUser;
         let secondUser;
@@ -40,17 +41,17 @@ function getGroupChatTypingString(inputTypingManager) {
         }
 
         if (!firstUser || !secondUser) {
-            return `${size} people are typing`;
+            return t('AreTypingGroup', t('PeopleNum', size));
         }
 
         firstUser = firstUser.first_name ? firstUser.first_name : firstUser.second_name;
         secondUser = secondUser.first_name ? secondUser.first_name : secondUser.second_name;
 
         if (!firstUser || !secondUser) {
-            return `${size} people are typing`;
+            return t('AreTypingGroup', t('PeopleNum', size));
         }
 
-        return `${firstUser} and ${secondUser} are typing`;
+        return t('AreTypingGroup', t('PersonAndPerson', firstUser, secondUser));
     } else {
         let firstUser;
         if (inputTypingManager.actions.size >= 1) {
@@ -62,40 +63,40 @@ function getGroupChatTypingString(inputTypingManager) {
             }
 
             if (!firstUser) {
-                return `1 person is typing`;
+                return t('IsTypingGroup', t('PeopleNum', 1));
             }
 
             firstUser = firstUser.first_name ? firstUser.first_name : firstUser.second_name;
 
             if (!firstUser) {
-                return `1 person is typing`;
+                return t('IsTypingGroup', t('PeopleNum', 1));
             }
 
             let action = inputTypingManager.actions.values().next().value.action;
             switch (action['@type']) {
                 case 'chatActionRecordingVideo':
-                    return `${firstUser} is recording a video`;
+                    return t('IsRecordingRound', firstUser);
                 case 'chatActionRecordingVideoNote':
-                    return `${firstUser} is recording a video message`;
+                    return t('IsRecordingRound', firstUser);
                 case 'chatActionRecordingVoiceNote':
-                    return `${firstUser} is recording a voice message`;
+                    return t('IsRecordingAudio', firstUser);
                 case 'chatActionStartPlayingGame':
-                    return `${firstUser} is playing a game`;
+                    return t('IsSendingGame', firstUser);
                 case 'chatActionUploadingDocument':
-                    return `${firstUser} is sending a file`;
+                    return t('IsSendingFile', firstUser);
                 case 'chatActionUploadingPhoto':
-                    return `${firstUser} is sending a photo`;
+                    return t('IsSendingPhoto', firstUser);
                 case 'chatActionUploadingVideo':
-                    return `${firstUser} is sending a video`;
+                    return t('IsSendingVideo', firstUser);
                 case 'chatActionUploadingVideoNote':
-                    return `${firstUser} is sending a video message`;
+                    return t('IsSendingVideo', firstUser);
                 case 'chatActionUploadingVoiceNote':
-                    return `${firstUser} is sending a voice message`;
+                    return t('IsSendingAudio', firstUser);
                 case 'chatActionChoosingContact':
                 case 'chatActionChoosingLocation':
                 case 'chatActionTyping':
                 default:
-                    return `${firstUser} is typing`;
+                    return t('IsTypingGroup', firstUser);
             }
         }
     }
@@ -110,28 +111,28 @@ function getPrivateChatTypingString(inputTypingManager) {
         let action = inputTypingManager.actions.values().next().value.action;
         switch (action['@type']) {
             case 'chatActionRecordingVideo':
-                return 'recording a video';
+                return t('RecordingRound');
             case 'chatActionRecordingVideoNote':
-                return 'recording a video message';
+                return t('RecordingRound');
             case 'chatActionRecordingVoiceNote':
-                return 'recording a voice message';
+                return t('RecordingAudio');
             case 'chatActionStartPlayingGame':
-                return 'playing a game';
+                return t('SendingGame');
             case 'chatActionUploadingDocument':
-                return 'sending a file';
+                return t('SendingFile');
             case 'chatActionUploadingPhoto':
-                return 'sending a photo';
+                return t('SendingPhoto');
             case 'chatActionUploadingVideo':
-                return 'sending a video';
+                return t('SendingVideo');
             case 'chatActionUploadingVideoNote':
-                return 'sending a video message';
+                return t('SendingVideo');
             case 'chatActionUploadingVoiceNote':
-                return 'sending a voice message';
+                return t('SendingAudio');
             case 'chatActionChoosingContact':
             case 'chatActionChoosingLocation':
             case 'chatActionTyping':
             default:
-                return 'typing';
+                return t('Typing');
         }
     }
 
@@ -150,12 +151,12 @@ function getChatTypingString(chatId) {
         case 'chatTypePrivate':
         case 'chatTypeSecret': {
             const typingString = getPrivateChatTypingString(typingManager);
-            return typingString ? typingString + '...' : null;
+            return typingString ? typingString : null;
         }
         case 'chatTypeBasicGroup':
         case 'chatTypeSupergroup': {
             const typingString = getGroupChatTypingString(typingManager);
-            return typingString ? typingString + '...' : null;
+            return typingString ? typingString : null;
         }
     }
 
