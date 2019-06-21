@@ -9,50 +9,51 @@ import dateFormat from 'dateformat';
 import { getLetters, getSize } from './Common';
 import { PROFILE_PHOTO_BIG_SIZE, PROFILE_PHOTO_SMALL_SIZE, SERVICE_NOTIFICATIONS_USER_ID } from '../Constants';
 import UserStore from '../Stores/UserStore';
+import { t } from 'i18next';
 
 function getUserStatus(user) {
     if (!user) return null;
     if (!user.status) return null;
 
     if (user.id === SERVICE_NOTIFICATIONS_USER_ID) {
-        return 'service notifications';
+        return t('ServiceNotifications').toLocaleLowerCase();
     }
 
     if (user.type && user.type['@type'] === 'userTypeBot') {
-        return 'bot';
+        return t('Bot');
     }
 
     switch (user.status['@type']) {
         case 'userStatusEmpty': {
-            return 'last seen a long time ago';
+            return t('ALongTimeAgo');
         }
         case 'userStatusLastMonth': {
-            return 'last seen within a month';
+            return t('WithinAMonth');
         }
         case 'userStatusLastWeek': {
-            return 'last seen within a week';
+            return t('WithinAWeek');
         }
         case 'userStatusOffline': {
             let { was_online } = user.status;
-            if (!was_online) return 'offline';
+            if (!was_online) return t('Offline');
 
             const now = new Date();
             const wasOnline = new Date(was_online * 1000);
             if (wasOnline > now) {
-                return 'last seen just now';
+                return t('LastSeenFormatted', t('Now'));
             }
 
             let diff = new Date(now - wasOnline);
 
             // within a minute
             if (diff.getTime() / 1000 < 60) {
-                return 'last seen just now';
+                return t('LastSeenFormatted', t('Now'));
             }
 
             // within an hour
             if (diff.getTime() / 1000 < 60 * 60) {
                 const minutes = Math.floor(diff.getTime() / 1000 / 60);
-                return `last seen ${minutes === 1 ? '1 minute' : minutes + ' minutes'} ago`;
+                return t('LastSeenFormatted', t('Ago', t('Minutes', minutes)));
             }
 
             // today
@@ -62,11 +63,11 @@ function getUserStatus(user) {
                 // up to 6 hours ago
                 if (diff.getTime() / 1000 < 6 * 60 * 60) {
                     const hours = Math.floor(diff.getTime() / 1000 / 60 / 60);
-                    return `last seen ${hours === 1 ? '1 hour' : hours + ' hours'} ago`;
+                    return t('LastSeenFormatted', t('Ago', t('Hours', hours)));
                 }
 
                 // other
-                return `last seen today at ${dateFormat(wasOnline, 'H:MM')}`;
+                return t('LastSeenFormatted', t('TodayAtFormatted', dateFormat(wasOnline, 'H:MM')));
             }
 
             // yesterday
@@ -74,16 +75,16 @@ function getUserStatus(user) {
             yesterday.setDate(now.getDate() - 1);
             today.setHours(0, 0, 0, 0);
             if (wasOnline > yesterday) {
-                return `last seen yesterday at ${dateFormat(wasOnline, 'H:MM')}`;
+                return t('LastSeenFormatted', t('YesterdayAtFormatted', dateFormat(wasOnline, 'H:MM')));
             }
 
-            return `last seen ${dateFormat(wasOnline, 'dd.mm.yyyy')}`;
+            return t('LastSeenDateFormatted', dateFormat(wasOnline, 'dd.mm.yyyy'));
         }
         case 'userStatusOnline': {
-            return 'online';
+            return t('Online');
         }
         case 'userStatusRecently': {
-            return 'last seen recently';
+            return t('Lately');
         }
     }
 

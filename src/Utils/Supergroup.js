@@ -7,6 +7,7 @@
 
 import SupergroupStore from '../Stores/SupergroupStore';
 import ChatStore from '../Stores/ChatStore';
+import { t } from 'i18next';
 
 function getSupergroupStatus(supergroup, chatId) {
     if (!supergroup) return null;
@@ -24,15 +25,8 @@ function getSupergroupStatus(supergroup, chatId) {
         }
     }
 
-    if (!count) return '0 members';
-    if (count === 1) return '1 member';
-
     const onlineCount = ChatStore.getOnlineMemberCount(chatId);
-    if (onlineCount > 1) {
-        return `${count} members, ${onlineCount} online`;
-    }
-
-    return `${count} members`;
+    return t('Members', count) + (onlineCount > 1 ? `, ${onlineCount} ${t('Online')}` : '');
 }
 
 export { getSupergroupStatus };

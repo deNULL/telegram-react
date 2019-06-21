@@ -6,6 +6,7 @@
  */
 
 import ChatStore from '../Stores/ChatStore';
+import { t } from 'i18next';
 
 function getBasicGroupStatus(basicGroup, chatId) {
     if (!basicGroup) return null;
@@ -16,15 +17,8 @@ function getBasicGroupStatus(basicGroup, chatId) {
         return 'group is inaccessible';
     }
 
-    if (!count) return '0 members';
-    if (count === 1) return '1 member';
-
     const onlineCount = ChatStore.getOnlineMemberCount(chatId);
-    if (onlineCount > 1) {
-        return `${count} members, ${onlineCount} online`;
-    }
-
-    return `${count} members`;
+    return t('Members', count) + (onlineCount > 1 ? `, ${onlineCount} ${t('Online')}` : '');
 }
 
 export { getBasicGroupStatus };

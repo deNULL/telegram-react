@@ -77,7 +77,10 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     StickersTab: 'STICKERS',
                     EmojiTab: 'EMOJI',
 
-                    CallCancelled: 'Cancelled'
+                    CallCancelled: 'Cancelled',
+                    Offline: 'offline',
+                    Ago: '%1$s ago',
+                    Now: 'just now'
                 },
                 emoji: {
                     Search: 'Search',
@@ -117,7 +120,10 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     StickersTab: 'СТИКЕРЫ',
                     EmojiTab: 'ЭМОДЗИ',
 
-                    CallCancelled: 'Отменён'
+                    CallCancelled: 'Отменён',
+                    Offline: 'не в сети',
+                    Ago: '%1$s назад',
+                    Now: 'только что'
                 },
                 emoji: {
                     Search: 'Поиск',
