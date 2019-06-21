@@ -8,23 +8,20 @@
 import React from 'react';
 import FooterCommand from './FooterCommand';
 import NotificationsControl from './NotificationsControl';
+import { withTranslation } from 'react-i18next';
 
 class NotificationsCommandControl extends NotificationsControl {
-    constructor(props){
+    constructor(props) {
         super(props);
     }
 
     render() {
+        const { t } = this.props;
         const { isMuted } = this.state;
-        const command = isMuted ? 'unmute' : 'mute';
+        const command = isMuted ? t('ChannelUnmute') : t('ChannelMute');
 
-        return (
-            <FooterCommand
-                command={command}
-                onCommand={this.handleSetChatNotifications}/>
-        );
+        return <FooterCommand command={command} onCommand={this.handleSetChatNotifications} />;
     }
-
 }
 
-export default NotificationsCommandControl;
+export default withTranslation()(NotificationsCommandControl);
