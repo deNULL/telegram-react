@@ -22,6 +22,7 @@ import withTheme from './Theme';
 import AuthFormControl from './Components/Auth/AuthFormControl';
 import InactivePage from './Components/InactivePage';
 import StubPage from './Components/StubPage';
+import LoggingOutPage from './Components/LoggingOutPage';
 import registerServiceWorker from './registerServiceWorker';
 import { OPTIMIZATIONS_FIRST_START } from './Constants';
 import ChatStore from './Stores/ChatStore';
@@ -163,6 +164,8 @@ class TelegramApp extends Component {
                 case 'authorizationStateClosed':
                 case 'authorizationStateClosing':
                 case 'authorizationStateLoggingOut':
+                    page = <LoggingOutPage />;
+                    break;
                 case 'authorizationStateReady': {
                     page = (
                         <React.Suspense fallback={<StubPage title='' />}>
