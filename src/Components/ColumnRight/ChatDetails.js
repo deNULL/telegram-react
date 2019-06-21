@@ -72,7 +72,8 @@ const styles = theme => ({
         padding: theme.spacing.unit / 2
     },
     listItem: {
-        padding: '11px 22px'
+        padding: '11px 22px',
+        alignItems: 'start'
     }
 });
 
