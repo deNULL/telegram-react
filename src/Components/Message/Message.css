@@ -123,6 +123,30 @@ pre code {
     font-weight: 700;
 }
 
+.message-text.emoji-large {
+    font-size: 64px;
+    line-height: 64px;
+    margin-top: 6px;
+    letter-spacing: 5px;
+    text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+}
+
+.message-text.emoji-medium {
+    font-size: 48px;
+    line-height: 48px;
+    margin-top: 4px;
+    letter-spacing: 5px;
+    text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+}
+
+.message-text.emoji-small {
+    font-size: 40px;
+    line-height: 40px;
+    margin-top: 2px;
+    letter-spacing: 5px;
+    text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+}
+
 .message-meta {
     user-select: none;
     color: #adadad;

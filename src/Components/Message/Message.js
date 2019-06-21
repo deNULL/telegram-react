@@ -26,6 +26,7 @@ import {
     getUnread,
     getSenderUserId,
     getWebPage,
+    getEmojiCount,
     openMedia
 } from '../../Utils/Message';
 import { canSendMessages, isPrivateChat, getChatShortTitle } from '../../Utils/Chat';
@@ -491,7 +492,7 @@ class Message extends Component {
         const message = MessageStore.get(chatId, messageId);
         if (!message) return <div>[empty message]</div>;
 
-        const { sending_state, views, edit_date, reply_to_message_id, forward_info } = message;
+        const { sending_state, views, edit_date, reply_to_message_id, forward_info, content } = message;
 
         const text = getText(message, this.handleLinkClick);
         const webPage = getWebPage(message);
@@ -500,6 +501,19 @@ class Message extends Component {
         const media = getMedia(message, this.openMedia);
         this.unread = getUnread(message);
         const senderUserId = getSenderUserId(message);
+
+        let emojiClass = '';
+        if (
+            content &&
+            content['@type'] === 'messageText' &&
+            content.text &&
+            content.text['@type'] === 'formattedText' &&
+            content.text.text &&
+            !content.text.entities.length
+        ) {
+            const emojiCount = getEmojiCount(content.text.text);
+            emojiClass = emojiCount ? ['emoji-large', 'emoji-medium', 'emoji-small'][emojiCount - 1] : '';
+        }
 
         let canBeDeleted = true;
         let canBeForwarded = true;
@@ -575,7 +589,7 @@ class Message extends Component {
                         </div>
                         {Boolean(reply_to_message_id) && <Reply chatId={chatId} messageId={reply_to_message_id} />}
                         {media}
-                        <div className='message-text'>{text}</div>
+                        <div className={['message-text', emojiClass].join(' ')}>{text}</div>
                         {webPage && <WebPage chatId={chatId} messageId={messageId} openMedia={this.openMedia} />}
                     </div>
                 </div>
