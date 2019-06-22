@@ -545,10 +545,12 @@ function loadPhotoContent(store, photo, message) {
     if (!file) return;
 
     file = FileStore.get(file.id) || file;
-    const { id } = file;
+    const { id, local } = file;
 
     const blob = FileStore.getBlob(id);
     if (blob) return;
+
+    if (!local.is_downloading_completed && !local.can_be_downloaded) return false;
 
     FileStore.getLocalFile(
         store,
@@ -570,10 +572,12 @@ function loadPhotoThumbnailContent(store, photo, message) {
     if (!file) return false;
 
     file = FileStore.get(file.id) || file;
-    const { id } = file;
+    const { id, local } = file;
 
     const blob = FileStore.getBlob(id);
     if (blob) return true;
+
+    if (!local.is_downloading_completed && !local.can_be_downloaded) return false;
 
     FileStore.getLocalFile(
         store,
