@@ -111,7 +111,20 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     SendFile: 'Are you sure you want to send file?',
                     PinMessage: 'Pin',
 
-                    LoggingOut: 'Logging out…'
+                    LoggingOut: 'Logging out…',
+
+                    OutgoingSelfdestructingPhotoMobile:
+                        'You sent a self-destructing photo. Please view it on your mobile',
+                    IncomingSelfdestructingPhotoMobile: ' sent a self-destructing photo. Please view it on your mobile',
+                    OutgoingSelfdestructingVideoMobile:
+                        'You sent a self-destructing video. Please view it on your mobile',
+                    IncomingSelfdestructingVideoMobile: ' sent a self-destructing video. Please view it on your mobile',
+                    OutgoingSelfdestructingMessageMobile:
+                        'You sent a self-destructing message. Please view it on your mobile',
+                    IncomingSelfdestructingMessageMobile:
+                        ' sent a self-destructing message. Please view it on your mobile',
+                    ActionMigrateToGroup: 'Group migrated to a supergroup',
+                    ActionJoinedTelegram: 'un1 just joined Telegram'
                 },
                 emoji: {
                     Search: 'Search',
@@ -186,7 +199,22 @@ i18n.use(initReactI18next) //.use(LanguageDetector) // passes i18n down to react
                     SendFile: 'Вы уверены, что хотите отправить файл?',
                     PinMessage: 'Закрепить',
 
-                    LoggingOut: 'Завершение сеанса…'
+                    LoggingOut: 'Завершение сеанса…',
+
+                    OutgoingSelfdestructingPhotoMobile:
+                        'Вы отправили самоуничтожающуюся фотографию. Вы можете просмотреть её в мобильном приложении',
+                    IncomingSelfdestructingPhotoMobile:
+                        ' отправил(а) самоуничтожающуюся фотографию. Вы можете просмотреть её в мобильном приложении',
+                    OutgoingSelfdestructingVideoMobile:
+                        'Вы отправили самоуничтожающееся видео. Вы можете просмотреть его в мобильном приложении',
+                    IncomingSelfdestructingVideoMobile:
+                        ' отправил(а) самоуничтожающееся видео. Вы можете просмотреть его в мобильном приложении',
+                    OutgoingSelfdestructingMessageMobile:
+                        'Вы отправили самоуничтожающееся сообщение. Вы можете просмотреть его в мобильном приложении',
+                    IncomingSelfdestructingMessageMobile:
+                        ' отправил(а) самоуничтожающееся сообщение. Вы можете просмотреть его в мобильном приложении',
+                    ActionMigrateToGroup: 'Группа мигрировала в супергруппу',
+                    ActionJoinedTelegram: 'un1 теперь в Telegram'
                 },
                 emoji: {
                     Search: 'Поиск',

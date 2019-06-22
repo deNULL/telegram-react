@@ -12,6 +12,7 @@ import ChatStore from '../Stores/ChatStore';
 import UserStore from '../Stores/UserStore';
 import SupergroupStore from '../Stores/SupergroupStore';
 import MessageStore from '../Stores/MessageStore';
+import { t } from 'i18next';
 
 let serviceMap = new Map();
 serviceMap.set('messageBasicGroupChatCreate', 'messageBasicGroupChatCreate');
@@ -46,68 +47,91 @@ function isServiceMessage(message) {
 
 function getTTLString(ttl) {
     if (ttl < 60) {
-        const seconds = ttl === 1 ? 'second' : 'seconds';
-        return `${ttl} ${seconds}`;
+        return t('Seconds', ttl);
     }
     if (ttl < 60 * 60) {
-        const minutes = Math.floor(ttl / 60) === 1 ? 'minute' : 'minutes';
-        return `${ttl} ${minutes}`;
+        const minutes = Math.floor(ttl / 60);
+        return t('Minutes', minutes);
     }
     if (ttl < 24 * 60 * 60) {
-        const hours = Math.floor(ttl / 60 / 60) === 1 ? 'hour' : 'hours';
-        return `${ttl} ${hours}`;
+        const hours = Math.floor(ttl / 60 / 60);
+        return t('Hours', hours);
     }
     if (ttl < 7 * 24 * 60 * 60) {
-        const days = Math.floor(ttl / 60 / 60 / 24) === 1 ? 'day' : 'days';
-        return `${ttl} ${days}`;
+        const days = Math.floor(ttl / 60 / 60 / 24);
+        return t('Days', days);
     }
-    if (ttl === 7 * 24 * 60 * 60) {
-        return '1 week';
+    if (ttl >= 7 * 24 * 60 * 60) {
+        const weeks = Math.floor(ttl / 60 / 60 / 24 / 7);
+        return t('Weeks', weeks);
     }
 
-    return `${ttl} seconds`;
+    return t('Seconds', ttl);
+}
+
+function tFormatted(str) {
+    const regexp = new RegExp('un([1-9])', 'g');
+    const result = [];
+    let match;
+    let index = 0;
+    while ((match = regexp.exec(str))) {
+        const last = regexp.lastIndex - match[0].length;
+        if (last > index) {
+            result.push(str.substring(index, last));
+        }
+
+        const item = parseInt(match[1]);
+        if (item < arguments.length) {
+            result.push(arguments[item]);
+        }
+        index = regexp.lastIndex;
+    }
+    if (index < str.length - 1) {
+        result.push(str.substring(index));
+    }
+    return result;
 }
 
 function getPassportElementTypeString(type) {
     switch (type['@type']) {
         case 'passportElementTypeAddress': {
-            return 'Address';
+            return t('ActionBotDocumentAddress');
         }
         case 'passportElementTypeBankStatement': {
-            return 'Bank Statement';
+            return t('ActionBotDocumentBankStatement');
         }
         case 'passportElementTypeDriverLicense': {
-            return 'Driver Licence';
+            return t('ActionBotDocumentDriverLicence');
         }
         case 'passportElementTypeEmailAddress': {
-            return 'Email';
+            return t('ActionBotDocumentEmail');
         }
         case 'passportElementTypeIdentityCard': {
-            return 'Identity Card';
+            return t('ActionBotDocumentIdentityCard');
         }
         case 'passportElementTypeInternalPassport': {
-            return 'Internal Passport';
+            return t('ActionBotDocumentInternalPassport');
         }
         case 'passportElementTypePassport': {
-            return 'Passport';
+            return t('ActionBotDocumentPassport');
         }
         case 'passportElementTypePassportRegistration': {
-            return 'Passport Registration';
+            return t('ActionBotDocumentPassportRegistration');
         }
         case 'passportElementTypePersonalDetails': {
-            return 'Personal details';
+            return t('ActionBotDocumentPersonalDetails');
         }
         case 'passportElementTypePhoneNumber': {
-            return 'Phone Number';
+            return t('ActionBotDocumentPhoneNumber');
         }
         case 'passportElementTypeRentalAgreement': {
-            return 'Tenancy Agreement';
+            return t('ActionBotDocumentRentalAgreement');
         }
         case 'passportElementTypeTemporaryRegistration': {
-            return 'Temporary Registration';
+            return t('ActionBotDocumentTemporaryRegistration');
         }
         case 'passportElementTypeUtilityBill': {
-            return 'Utility Bill';
+            return t('ActionBotDocumentUtilityBill');
         }
     }
 
@@ -142,37 +166,37 @@ function getServiceMessageContent(message, openUser = false) {
         switch (content['@type']) {
             case 'messagePhoto': {
                 if (isOutgoing) {
-                    return 'You sent a self-destructing photo. Please view it on your mobile';
+                    return t('OutgoingSelfdestructingPhotoMobile');
                 }
 
                 return (
                     <>
                         <MessageAuthor userId={sender_user_id} openUser={openUser} />
-                        {' sent a self-destructing photo. Please view it on your mobile'}
+                        {t('IncomingSelfdestructingPhotoMobile')}
                     </>
                 );
             }
             case 'messageVideo': {
                 if (isOutgoing) {
-                    return 'You sent a self-destructing video. Please view it on your mobile';
+                    return t('OutgoingSelfdestructingVideoMobile');
                 }
 
                 return (
                     <>
                         <MessageAuthor userId={sender_user_id} openUser={openUser} />
-                        {' sent a self-destructing video. Please view it on your mobile'}
+                        {t('IncomingSelfdestructingVideoMobile')}
                     </>
                 );
             }
             default: {
                 if (isOutgoing) {
-                    return 'You sent a self-destructing message. Please view it on your mobile';
+                    return t('OutgoingSelfdestructingMessageMobile');
                 }
 
                 return (
                     <>
                         <MessageAuthor userId={sender_user_id} openUser={openUser} />
-                        {' sent a self-destructing message. Please view it on your mobile'}
+                        {t('IncomingSelfdestructingMessageMobile')}
                     </>
                 );
             }
@@ -204,41 +228,44 @@ function getServiceMessageContent(message, openUser = false) {
 
             if (isOutgoing) {
                 return content.member_user_ids.length === 1 && content.member_user_ids[0] === UserStore.getMyId() ? (
-                    'You joined the group'
+                    t('EventLogYouGroupJoined')
                 ) : (
-                    <>
-                        {'You added '}
-                        {members}
-                    </>
+                    <>{tFormatted(t('ActionYouAddUser'), null, members)}</>
                 );
             }
 
             return content.member_user_ids.length === 1 && content.member_user_ids[0] === message.sender_user_id ? (
                 <>
-                    <MessageAuthor userId={sender_user_id} openUser={openUser} />
-                    {' joined the group'}
+                    {tFormatted(
+                        t('ActionAddUserSelfMega'),
+                        <MessageAuthor userId={sender_user_id} openUser={openUser} />
+                    )}
                 </>
             ) : (
                 <>
-                    <MessageAuthor userId={sender_user_id} openUser={openUser} />
-                    {' added '}
-                    {members}
+                    {tFormatted(
+                        t('EventLogAdded'),
+                        <MessageAuthor userId={sender_user_id} openUser={openUser} />,
+                        members
+                    )}
                 </>
             );
         }
         case 'messageChatChangePhoto': {
             if (isChannel) {
-                return 'Channel photo updated';
+                return t('ActionChannelChangedPhoto');
             }
 
             if (isOutgoing) {
-                return 'You updated group photo';
+                return t('EventLogEditedYouChannelPhoto');
             }
 
             return (
                 <>
-                    <MessageAuthor userId={sender_user_id} openUser={openUser} />
-                    {` updated group photo`}
+                    {tFormatted(
+                        t('EventLogEditedGroupPhoto'),
+                        <MessageAuthor userId={sender_user_id} openUser={openUser} />
+                    )}
                 </>
             );
         }
@@ -246,71 +273,71 @@ function getServiceMessageContent(message, openUser = false) {
             const { title } = content;
 
             if (isChannel) {
-                return `Channel name was changed to «${title}»`;
+                return tFormatted(t('ActionChannelChangedTitle'), null, title);
             }
 
             if (isOutgoing) {
-                return `You changed group name to «${title}»`;
+                return tFormatted(t('ActionYouChangedTitle'), null, title);
             }
 
             return (
                 <>
-                    <MessageAuthor userId={sender_user_id} openUser={openUser} />
-                    {` changed group name to «${title}»`}
+                    {tFormatted(
+                        t('ActionChangedTitle'),
+                        <MessageAuthor userId={sender_user_id} openUser={openUser} />,
+                        title
+                    )}
                 </>
             );
         }
         case 'messageChatDeleteMember': {
             if (isOutgoing) {
                 return content.user_id === UserStore.getMyId() ? (
-                    'You left the group'
+                    t('ActionYouLeftUser')
                 ) : (
                     <>
-                        {'You removed '}
-                        <MessageAuthor userId={content.user_id} openUser={openUser} />
+                        {tFormatted(
+                            t('ActionYouKickUser'),
+                            <MessageAuthor userId={content.user_id} openUser={openUser} />
+                        )}
                     </>
                 );
             }
 
             return content.user_id === sender_user_id ? (
-                <>
-                    <MessageAuthor userId={sender_user_id} openUser={openUser} />
-                    {' left the group'}
-                </>
+                <>{tFormatted(t('EventLogLeft'), <MessageAuthor userId={sender_user_id} openUser={openUser} />)}</>
             ) : (
                 <>
-                    <MessageAuthor userId={sender_user_id} openUser={openUser} />
-                    {' removed '}
-                    <MessageAuthor userId={content.user_id} openUser={openUser} />
+                    {tFormatted(
+                        t('EventLogRemoved'),
+                        <MessageAuthor userId={sender_user_id} openUser={openUser} />,
+                        <MessageAuthor userId={content.user_id} openUser={openUser} />
+                    )}
                 </>
             );
         }
         case 'messageChatDeletePhoto': {
             if (isChannel) {
-                return 'Channel photo removed';
+                return t('ActionChannelRemovedPhoto');
             }
 
             if (isOutgoing) {
-                return 'You removed group photo';
+                return t('EventLogRemovedYouGroupPhoto');
             }
 
             return (
                 <>
-                    <MessageAuthor userId={sender_user_id} openUser={openUser} />
-                    {' removed group photo'}
+                    {tFormatted(t('ActionRemovedPhoto'), <MessageAuthor userId={sender_user_id} openUser={openUser} />)}
                 </>
             );
         }
         case 'messageChatJoinByLink': {
             if (isOutgoing) {
-                return 'You joined the group via invite link';
+                return t('ActionInviteYou');
             }
 
             return (
-                <>
-                    <MessageAuthor userId={sender_user_id} openUser={openUser} />
-                    {' joined the group via invite link'}
-                </>
+                <>{tFormatted(t('ActionInviteUser'), <MessageAuthor userId={sender_user_id} openUser={openUser} />)}</>
             );
         }
         case 'messageChatSetTtl': {
@@ -319,39 +346,46 @@ function getServiceMessageContent(message, openUser = false) {
 
             if (ttl <= 0) {
                 if (isOutgoing) {
-                    return 'You disabled the self-destruct timer';
+                    return t('MessageLifetimeYouRemoved');
                 }
 
                 return (
                     <>
-                        <MessageAuthor userId={sender_user_id} openUser={openUser} />
-                        {' disabled the self-destruct timer'}
+                        {tFormatted(
+                            t('MessageLifetimeRemoved'),
+                            <MessageAuthor userId={sender_user_id} openUser={openUser} />
+                        )}
                     </>
                 );
             }
 
             if (isOutgoing) {
-                return `You set the self-destruct timer to ${ttlString}`;
+                return t('MessageLifetimeChangedOutgoing', ttlString);
             }
 
             return (
                 <>
-                    <MessageAuthor userId={sender_user_id} openUser={openUser} />
-                    {` set the self-destruct timer to ${ttlString}`}
+                    {tFormatted(
+                        t('MessageLifetimeChanged'),
+                        <MessageAuthor userId={sender_user_id} openUser={openUser} />,
+                        ttlString
+                    )}
                 </>
             );
         }
         case 'messageChatUpgradeFrom': {
-            return 'The group was upgraded to a supergroup';
+            return t('ActionMigrateFromGroup');
         }
         case 'messageChatUpgradeTo': {
-            return 'Group migrated to a supergroup';
+            return t('ActionMigrateToGroup');
         }
         case 'messageContactRegistered': {
             return (
                 <>
-                    <MessageAuthor userId={sender_user_id} openUser={openUser} />
-                    {' just joined Telegram'}
+                    {tFormatted(
+                        t('ActionJoinedTelegram'),
+                        <MessageAuthor userId={sender_user_id} openUser={openUser} />
+                    )}
                 </>
             );
         }
@@ -369,25 +403,32 @@ function getServiceMessageContent(message, openUser = false) {
                 const { game } = messageGame.content;
 
                 if (isOutgoing) {
-                    return `You scored ${content.score} in «${game.title}»`;
+                    return t('ActionYouScoredInGame', content.score, game.title);
                 }
 
                 return (
                     <>
-                        <MessageAuthor userId={messageGame.sender_user_id} openUser={openUser} />
-                        {` scored ${content.score} in «${game.title}»`}
+                        {t(
+                            'ActionUserScored',
+                            <MessageAuthor userId={messageGame.sender_user_id} openUser={openUser} />,
+                            content.score,
+                            game.title
+                        )}
                     </>
                 );
             }
 
             if (isOutgoing) {
-                return `You scored ${content.score}`;
+                return t('ActionYouScored', content.score);
             }
 
             return (
                 <>
-                    <MessageAuthor userId={sender_user_id} openUser={openUser} />
-                    {` scored ${content.score}`}
+                    {t(
+                        'ActionUserScored',
+                        <MessageAuthor userId={sender_user_id} openUser={openUser} />,
+                        content.score
+                    )}
                 </>
             );
         }
@@ -405,9 +446,11 @@ function getServiceMessageContent(message, openUser = false) {
 
             return (
                 <>
-                    <MessageAuthor userId={chat.type.user_id} openUser={openUser} />
-                    {' received the following documents: '}
-                    {passportElementTypes}
+                    {tFormatted(
+                        t('ActionBotDocuments'),
+                        <MessageAuthor userId={chat.type.user_id} openUser={openUser} />,
+                        passportElementTypes
+                    )}
                 </>
             );
         }
@@ -452,121 +495,116 @@ function getServiceMessageContent(message, openUser = false) {
             const author = getMessageAuthor(message, openUser);
             const pinnedMessage = MessageStore.get(message.chat_id, content.message_id);
             if (!pinnedMessage || !pinnedMessage.content) {
-                return (
-                    <>
-                        {author}
-                        {' pinned a message'}
-                    </>
-                );
+                return <>{tFormatted(t('ActionPinnedNoText'), author)}</>;
             }
 
-            let pinnedContent = ' pinned a message';
+            let pinnedContent;
             if (isServiceMessage(pinnedMessage)) {
-                pinnedContent = ' pinned a service message';
+                pinnedContent = tFormatted(t('ActionPinnedNoText'), author);
             } else {
                 switch (pinnedMessage.content['@type']) {
                     case 'messageAnimation': {
-                        pinnedContent = ' pinned a GIF';
+                        pinnedContent = tFormatted(t('ActionPinnedGif'), author);
                         break;
                     }
                     case 'messageAudio': {
-                        pinnedContent = ' pinned a track';
+                        pinnedContent = tFormatted(t('ActionPinnedMusic'), author);
                         break;
                     }
                     case 'messageCall': {
-                        pinnedContent = ' pinned a call';
+                        pinnedContent = tFormatted(t('ActionPinnedNoText'), author);
                         break;
                     }
                     case 'messageContact': {
-                        pinnedContent = ' pinned a contact';
+                        pinnedContent = tFormatted(t('ActionPinnedContact'), author);
                         break;
                     }
                     case 'messageDocument': {
-                        pinnedContent = ' pinned a file';
+                        pinnedContent = tFormatted(t('ActionPinnedFile'), author);
                         break;
                     }
                     case 'messageExpiredPhoto': {
-                        pinnedContent = ' pinned a photo';
+                        pinnedContent = tFormatted(t('ActionPinnedPhoto'), author);
                         break;
                     }
                     case 'messageExpiredVideo': {
-                        pinnedContent = ' pinned a video';
+                        pinnedContent = tFormatted(t('ActionPinnedVideo'), author);
                         break;
                     }
                     case 'messageGame': {
-                        pinnedContent = ' pinned a game';
+                        pinnedContent = tFormatted(t('ActionPinnedNoText'), author);
                         break;
                     }
                     case 'messageInvoice': {
-                        pinnedContent = ' pinned an invoice';
+                        pinnedContent = tFormatted(t('ActionPinnedNoText'), author);
                         break;
                     }
                     case 'messageLocation': {
-                        pinnedContent = ' pinned a map';
+                        pinnedContent = tFormatted(t('ActionPinnedGeo'), author);
                         break;
                     }
                     case 'messagePhoto': {
-                        pinnedContent = ' pinned a photo';
+                        pinnedContent = tFormatted(t('ActionPinnedPhoto'), author);
                         break;
                     }
                     case 'messagePoll': {
-                        pinnedContent = ' pinned a poll';
+                        pinnedContent = tFormatted(t('ActionPinnedPoll'), author);
                         break;
                     }
                     case 'messageSticker': {
-                        pinnedContent = ' pinned a sticker';
+                        pinnedContent = tFormatted(t('ActionPinnedSticker'), author);
                         break;
                     }
                     case 'messageText': {
                         const maxLength = 16;
                         const text = pinnedMessage.content.text.text;
                         if (text.length <= maxLength) {
-                            pinnedContent = ` pinned «${text}»`;
+                            pinnedContent = tFormatted(t('ActionPinnedText', text), author);
                         } else {
-                            pinnedContent = ` pinned «${text.substring(0, maxLength)}...»`;
+                            pinnedContent = tFormatted(
+                                t('ActionPinnedText', text.substring(0, maxLength) + '…'),
+                                author
+                            );
                         }
 
                         break;
                     }
                     case 'messageUnsupported': {
-                        pinnedContent = ' pinned unsupported message';
+                        pinnedContent = tFormatted(t('ActionPinnedNoText'), author);
                         break;
                     }
                     case 'messageVenue': {
-                        pinnedContent = ' pinned a venue';
+                        pinnedContent = tFormatted(t('ActionPinnedGeo'), author);
                         break;
                     }
                     case 'messageVideo': {
-                        pinnedContent = ' pinned a video';
+                        pinnedContent = tFormatted(t('ActionPinnedVideo'), author);
                         break;
                     }
                     case 'messageVideoNote': {
-                        pinnedContent = ' pinned a video message';
+                        pinnedContent = tFormatted(t('ActionPinnedRound'), author);
                         break;
                     }
                     case 'messageVoiceNote': {
-                        pinnedContent = ' pinned a voice message';
+                        pinnedContent = tFormatted(t('ActionPinnedVoice'), author);
                         break;
                     }
                 }
             }
 
-            return (
-                <>
-                    {author}
-                    {pinnedContent}
-                </>
-            );
+            return <>{pinnedContent}</>;
         }
         case 'messageScreenshotTaken': {
             if (isOutgoing) {
-                return 'You took a screenshot!';
+                return t('ActionTakeScreenshootYou');
             }
 
             return (
                 <>
-                    <MessageAuthor userId={sender_user_id} openUser={openUser} />
-                    {' took a screenshot!'}
+                    {tFormatted(
+                        t('ActionTakeScreenshoot'),
+                        <MessageAuthor userId={sender_user_id} openUser={openUser} />
+                    )}
                 </>
             );
         }
@@ -574,25 +612,22 @@ function getServiceMessageContent(message, openUser = false) {
             const { title } = content;
 
             if (isChannel) {
-                return 'Channel created';
+                return t('ActionCreateChannel');
             }
 
             if (isOutgoing) {
-                return `You created group «${title}»`;
+                return t('ActionYouCreateGroup');
             }
 
             return (
-                <>
-                    <MessageAuthor userId={sender_user_id} openUser={openUser} />
-                    {` created group «${title}»`}
-                </>
+                <>{tFormatted(t('ActionCreateGroup'), <MessageAuthor userId={sender_user_id} openUser={openUser} />)}</>
             );
         }
         case 'messageUnsupported': {
-            return 'Unsupported message';
+            return t('UnsupportedMedia');
         }
         case 'messageWebsiteConnected': {
-            return `You allowed this bot to message you when you logged in on ${content.domain_name}.`;
+            return t('ActionBotAllowed', content.domain_name);
         }
     }
 
