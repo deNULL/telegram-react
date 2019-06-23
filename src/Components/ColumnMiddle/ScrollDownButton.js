@@ -18,7 +18,7 @@ import './ScrollDownButton.css';
 const styles = theme => ({
     background: {
         background: theme.palette.type === 'dark' ? theme.palette.background.default : '#FFFFFF',
-        color: theme.palette.primary.contrastText
+        color: theme.palette.text.primary
     },
     badge: {
         background: theme.palette.primary.main
