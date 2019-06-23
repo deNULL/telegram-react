@@ -1,0 +1,27 @@
+.scroll-down-button {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    bottom: 10px;
+    right: 30px;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 48px;
+    text-align: center;
+    line-height: 48px;
+}
+
+.scroll-down-badge {
+    position: absolute;
+    font-size: 14px;
+    line-height: 19px;
+    top: -12px;
+    padding: 1px 6px 0px;
+    left: 50%;
+    transform: translate(-50%, 0);
+    border-radius: 25px;
+}
+
+.scroll-down-icon {
+    margin-top: 4px;
+}

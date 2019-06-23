@@ -507,7 +507,7 @@ class Message extends Component {
     };
 
     render() {
-        const { t, classes, chatId, messageId, showUnreadSeparator } = this.props;
+        const { t, classes, chatId, messageId, showUnreadSeparator, onReplyClick } = this.props;
         const {
             contextMenu,
             left,
@@ -640,7 +640,9 @@ class Message extends Component {
                                 </a>
                             </div>
                         </div>
-                        {Boolean(reply_to_message_id) && <Reply chatId={chatId} messageId={reply_to_message_id} />}
+                        {Boolean(reply_to_message_id) && (
+                            <Reply chatId={chatId} messageId={reply_to_message_id} onClick={onReplyClick} />
+                        )}
                         {media}
                         <div className={['message-text', emojiClass].join(' ')}>{text}</div>
                         {webPage && <WebPage chatId={chatId} messageId={messageId} openMedia={this.openMedia} />}

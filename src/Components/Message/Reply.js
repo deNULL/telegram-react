@@ -46,12 +46,13 @@ class Reply extends React.Component {
     handleOpen = event => {
         event.stopPropagation();
 
-        const { chatId, messageId } = this.props;
+        const { chatId, messageId, onClick } = this.props;
 
         const message = MessageStore.get(chatId, messageId);
         if (!message) return null;
         if (isDeletedMessage(message)) return null;
 
+        onClick && onClick(event);
         openChat(chatId, messageId);
     };
 
