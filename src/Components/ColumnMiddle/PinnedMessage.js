@@ -19,6 +19,7 @@ import { getContent, getReplyPhotoSize, isDeletedMessage } from '../../Utils/Mes
 import { openChat } from '../../Actions/Client';
 import ChatStore from '../../Stores/ChatStore';
 import MessageStore from '../../Stores/MessageStore';
+import ApplicationStore from '../../Stores/ApplicationStore';
 import TdLibController from '../../Controllers/TdLibController';
 import './PinnedMessage.css';
 
@@ -77,10 +78,12 @@ class PinnedMessage extends React.Component {
         this.loadContent();
 
         ChatStore.on('updateChatPinnedMessage', this.onUpdateChatPinnedMessage);
+        ApplicationStore.on('clientUpdateThemeChange', this.onClientUpdateThemeChange);
     }
 
     componentWillUnmount() {
         ChatStore.removeListener('updateChatPinnedMessage', this.onUpdateChatPinnedMessage);
+        ApplicationStore.removeListener('clientUpdateThemeChange', this.onClientUpdateThemeChange);
     }
 
     onUpdateChatPinnedMessage = update => {
@@ -90,6 +93,10 @@ class PinnedMessage extends React.Component {
         if (chatId !== chat_id) return;
 
         this.setState({ messageId: pinned_message_id });
+    };
+
+    onClientUpdateThemeChange = update => {
+        this.forceUpdate();
     };
 
     loadContent = () => {
