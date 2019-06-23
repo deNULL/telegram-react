@@ -20,6 +20,7 @@
     left: 50%;
     transform: translate(-50%, 0);
     border-radius: 25px;
+    color: #fff;
 }
 
 .scroll-down-icon {
