@@ -14,6 +14,7 @@ import Reply from './Reply';
 import Forward from './Forward';
 import MessageStatus from './MessageStatus';
 import MessageAuthor from './MessageAuthor';
+import InlineKeyboard from './InlineKeyboard';
 import UserTileControl from '../Tile/UserTileControl';
 import ChatTileControl from '../Tile/ChatTileControl';
 import UnreadSeparator from './UnreadSeparator';
@@ -646,6 +647,7 @@ class Message extends Component {
                         {media}
                         <div className={['message-text', emojiClass].join(' ')}>{text}</div>
                         {webPage && <WebPage chatId={chatId} messageId={messageId} openMedia={this.openMedia} />}
+                        <InlineKeyboard chatId={chatId} messageId={messageId} />
                     </div>
                 </div>
 
